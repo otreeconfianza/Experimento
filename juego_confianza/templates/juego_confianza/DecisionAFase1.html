@@ -1,0 +1,31 @@
+{{ block title }}
+Fase 1 - Decisión del Participante A
+{{ endblock }}
+
+{{ block content }}
+
+<p>
+Usted pertenece al grupo A y ha sido emparejado con un Participante B.
+Ambos poseen en conjunto un monto inicial de <strong>$2</strong>.
+</p>
+
+<p>Elija una de las siguientes opciones:</p>
+
+<ul>
+    <li>
+        <strong>CONTINUAR:</strong> entregarle al Participante B los $2, monto que será duplicado por los organizadores.
+        Luego será decisión de B repartir equitativamente los ahora $4 (de modo que A y B reciben $2) o quedarse con los $4 (usted recibe $0).
+    </li>
+    <li>
+        <strong>NO CONTINUAR:</strong> finalizar la actividad y repartir los $2 en partes iguales, de modo que ambos reciben $1.
+    </li>
+</ul>
+
+<p>
+Si esta parte es seleccionada para el pago, usted recibirá el monto resultante de sus decisiones y de las del participante correspondiente.
+</p>
+
+{{ formfields }}
+{{ next_button }}
+
+{{ endblock }}
