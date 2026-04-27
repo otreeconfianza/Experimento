@@ -227,9 +227,9 @@ class Player(BasePlayer):
 
     def descripcion_asignacion_inicial(self):
         if self.condicion_inicial == 'normas':
-            return 'Usted ha sido asignado al Grupo 1: Normas Sociales.'
+            return 'Usted ha sido asignado al Grupo 1.'
         elif self.condicion_inicial == 'trust':
-            return f'Usted ha sido asignado al Grupo 2: Juego de Confianza. Su rol en la Fase 1 es Participante {self.rol}.'
+            return f'Usted ha sido asignado al Grupo 2: Su rol en la Fase 1 es Participante {self.rol}.'
         return ''
 
     def descripcion_fase2(self):
@@ -411,6 +411,20 @@ class Consentimiento(Page):
     def error_message(player, values):
         if not values.get('acepta'):
             return "Debe aceptar para continuar."
+class Bienvenida(Page):
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+
+class EsperaInicioExperimento(WaitPage):
+    wait_for_all_groups = True
+    title_text = "Esperando a los demás participantes"
+    body_text = "Por favor espere. El experimento comenzará cuando todos los participantes hayan presionado Siguiente."
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
 
 
 class ExplicacionGeneral(Page):
@@ -675,6 +689,16 @@ class ResultadosFase1(Page):
             pago_fase1=player.pago_fase1,
         )
 
+class EsperaFinFase1(WaitPage):
+    wait_for_all_groups = True
+    title_text = "Esperando a los demás participantes"
+    body_text = "Por favor espere. La Fase 2 comenzará cuando todos los participantes hayan terminado la Fase 1."
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+    
+
 
 # ----------------------------------------------------------------
 # TRANSICIÓN A ROUND 2
@@ -864,6 +888,8 @@ class Cierre(Page):
 
 page_sequence = [
     Consentimiento,
+    Bienvenida,
+    EsperaInicioExperimento,
     ExplicacionGeneral,
     AsignacionInicial,
 
@@ -888,6 +914,7 @@ page_sequence = [
     ANoContinuoFase1,
     WaitForFinalResultsFase1,
     ResultadosFase1,
+    EsperaFinFase1,
 
     TransicionFase2,
 
