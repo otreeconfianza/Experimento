@@ -298,19 +298,14 @@ def asignar_round_1(subsession: Subsession):
     for p in normas_players:
         p.condicion_inicial = 'normas'
         p.rol = 'Normas'
-        p.participant.condicion_inicial = 'normas'
 
     for p in trust_A:
         p.condicion_inicial = 'trust'
         p.rol = 'A'
-        p.participant.condicion_inicial = 'trust'
-        p.participant.rol_fase1 = 'A'
 
     for p in trust_B:
         p.condicion_inicial = 'trust'
         p.rol = 'B'
-        p.participant.condicion_inicial = 'trust'
-        p.participant.rol_fase1 = 'B'
 
     matrix = []
 
@@ -343,13 +338,15 @@ def asignar_round_2(subsession: Subsession):
     fase2_B = []
 
     for p in players:
-        origen = p.participant.condicion_inicial
+        origen = p.in_round(1).condicion_inicial
+
         if origen == 'trust':
-            p.condicion_inicial = origen
+            p.condicion_inicial = 'trust'
             p.rol = 'A'
             fase2_A.append(p)
+
         elif origen == 'normas':
-            p.condicion_inicial = origen
+            p.condicion_inicial = 'normas'
             p.rol = 'B'
             fase2_B.append(p)
 
@@ -380,8 +377,16 @@ def set_payoffs_fase1(group: Group):
     a = group.a_player()
     b = group.b_player()
 
-    a_decision = a.field_maybe_none('decision_a_fase1') if a else None
-    b_decision = b.field_maybe_none('decision_b_fase1') if b else None
+    if a is None or b is None:
+        for p in group.get_players():
+            p.pago_fase1 = cu(0)
+        return
+
+    a_decision = a.field_maybe_none('decision_a_fase1')
+    b_decision = b.field_maybe_none('decision_b_fase1')
+
+    a.pago_fase1 = cu(0)
+    b.pago_fase1 = cu(0)
 
     if a_decision == 'no_continuar':
         a.pago_fase1 = C.OUTSIDE_OPTION_EACH
@@ -393,17 +398,22 @@ def set_payoffs_fase1(group: Group):
         elif b_decision == 'no_compartir':
             a.pago_fase1 = cu(0)
             b.pago_fase1 = C.DOUBLED_AMOUNT
-        else:
-            a.pago_fase1 = cu(0)
-            b.pago_fase1 = cu(0)
 
 
 def set_payoffs_fase2(group: Group):
     a = group.a_player()
     b = group.b_player()
 
-    a_decision = a.field_maybe_none('decision_a_fase2') if a else None
-    b_decision = b.field_maybe_none('decision_b_fase2') if b else None
+    if a is None or b is None:
+        for p in group.get_players():
+            p.pago_fase2 = cu(0)
+        return
+
+    a_decision = a.field_maybe_none('decision_a_fase2')
+    b_decision = b.field_maybe_none('decision_b_fase2')
+
+    a.pago_fase2 = cu(0)
+    b.pago_fase2 = cu(0)
 
     if a_decision == 'no_continuar':
         a.pago_fase2 = C.OUTSIDE_OPTION_EACH
@@ -415,9 +425,6 @@ def set_payoffs_fase2(group: Group):
         elif b_decision == 'no_compartir':
             a.pago_fase2 = cu(0)
             b.pago_fase2 = C.DOUBLED_AMOUNT
-        else:
-            a.pago_fase2 = cu(0)
-            b.pago_fase2 = cu(0)
 
 
 # ----------------------------------------------------------------
@@ -626,9 +633,6 @@ def compute_belief_payoffs_fase2(subsession: Subsession):
 def set_final_payoff(player: Player):
     origen = player.condicion_inicial
 
-    # -------------------------------------------------
-    # GRUPO 1: solo hizo normas + juego 2
-    # -------------------------------------------------
     if origen == 'normas':
         rama = random.choice(['normas', 'trust_fase2'])
         player.rama_pago_seleccionada = rama
@@ -640,12 +644,9 @@ def set_final_payoff(player: Player):
 
         elif rama == 'trust_fase2':
             player.fase_pago_seleccionada = 'fase2'
-            player.pago_seleccionado_label = 'Juego de confianza - Fase 2'
+            player.pago_seleccionado_label = 'Actividad de interacción - Fase 2'
             player.payoff = player.in_round(2).pago_fase2
 
-    # -------------------------------------------------
-    # GRUPO 2: hizo juego 1 + juego 2 + creencias 1 + creencias 2
-    # -------------------------------------------------
     elif origen == 'trust':
         rama = random.choice([
             'trust_fase1',
@@ -674,6 +675,7 @@ def set_final_payoff(player: Player):
             player.fase_pago_seleccionada = 'fase2'
             player.pago_seleccionado_label = 'Predicciones - Fase 2'
             player.payoff = player.in_round(2).pago_creencias_fase2
+
 
 # ----------------------------------------------------------------
 # PÁGINAS INICIALES
@@ -1118,12 +1120,6 @@ class WaitForFinalResultsFase2(WaitPage):
     def after_all_players_arrive(group: Group):
         set_payoffs_fase2(group)
 
-        subsession = group.subsession
-        compute_belief_payoffs_fase2(subsession)
-
-        for p in group.get_players():
-            set_final_payoff(p)
-
 
 class ResultadosFase2(Page):
     @staticmethod
@@ -1158,7 +1154,6 @@ class ResultadosFase2(Page):
             else:
                 mensaje = "Resultado no disponible."
 
-        # Participantes que originalmente estuvieron en normas
         if player.condicion_inicial == 'normas':
             return dict(
                 mensaje_resultado_fase2=mensaje,
@@ -1169,7 +1164,6 @@ class ResultadosFase2(Page):
                 mostrar_detalle_trust=False,
             )
 
-        # Participantes que originalmente estuvieron en trust
         return dict(
             mensaje_resultado_fase2=mensaje,
             pago_fase2=player.pago_fase2,
@@ -1178,6 +1172,23 @@ class ResultadosFase2(Page):
             mostrar_detalle_normas=False,
             mostrar_detalle_trust=True,
         )
+
+
+class EsperaPagoFinalFase2(WaitPage):
+    wait_for_all_groups = True
+    title_text = "Esperando a los demás participantes"
+    body_text = "Por favor espere mientras se calcula el pago final del experimento."
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 2
+
+    @staticmethod
+    def after_all_players_arrive(subsession: Subsession):
+        compute_belief_payoffs_fase2(subsession)
+
+        for p in subsession.get_players():
+            set_final_payoff(p)
 
 
 # ----------------------------------------------------------------
@@ -1261,6 +1272,8 @@ page_sequence = [
     ANoContinuoFase2,
     WaitForFinalResultsFase2,
     ResultadosFase2,
+
+    EsperaPagoFinalFase2,
 
     CuestionarioFinal,
     Cierre,
