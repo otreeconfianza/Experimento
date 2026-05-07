@@ -15,9 +15,11 @@ Round 2 / Fase 2:
 - Quienes estuvieron en normas pasan a rol B
 - Se emparejan nuevamente A con B
 
-Uso de WaitPage:
-- B espera a que A decida
-- B solo decide si A continuó
+Pagos:
+- Grupo 1 (normas): pago por coincidencia con respuesta modal en 4 preguntas.
+- Grupo 2 (trust): pago aleatorio por desempeño en fase 1 o fase 2.
+- En trust, cada fase puede pagar por creencias o por juego de confianza.
+- Todas las ramas tienen pago máximo igual a 4.
 """
 
 
@@ -30,6 +32,8 @@ class C(BaseConstants):
     OUTSIDE_OPTION_EACH = cu(1)
     DOUBLED_AMOUNT = cu(4)
     SHARE_AMOUNT = cu(2)
+
+    MAX_PAYMENT = cu(4)
 
 
 class Subsession(BaseSubsession):
@@ -208,6 +212,21 @@ class Player(BasePlayer):
     comentario_final = models.LongStringField(blank=True, label="Comentario final (opcional)")
 
     # -------------------------
+    # Pagos auxiliares
+    # -------------------------
+    pago_normas = models.CurrencyField(initial=0)
+    pago_creencias_fase1 = models.CurrencyField(initial=0)
+    pago_creencias_fase2 = models.CurrencyField(initial=0)
+
+    score_normas = models.FloatField(initial=0)
+    score_creencias_fase1 = models.FloatField(initial=0)
+    score_creencias_fase2 = models.FloatField(initial=0)
+
+    fase_pago_seleccionada = models.StringField(blank=True)
+    rama_pago_seleccionada = models.StringField(blank=True)
+    pago_seleccionado_label = models.StringField(blank=True)
+
+    # -------------------------
     # Auxiliares
     # -------------------------
     def es_normas(self):
@@ -349,7 +368,7 @@ def asignar_round_2(subsession: Subsession):
 
 
 # ----------------------------------------------------------------
-# CÁLCULO DE PAGOS
+# CÁLCULO DE PAGOS DEL TRUST GAME
 # ----------------------------------------------------------------
 
 def set_payoffs_fase1(group: Group):
@@ -361,14 +380,17 @@ def set_payoffs_fase1(group: Group):
     a = group.a_player()
     b = group.b_player()
 
-    if a.decision_a_fase1 == 'no_continuar':
+    a_decision = a.field_maybe_none('decision_a_fase1') if a else None
+    b_decision = b.field_maybe_none('decision_b_fase1') if b else None
+
+    if a_decision == 'no_continuar':
         a.pago_fase1 = C.OUTSIDE_OPTION_EACH
         b.pago_fase1 = C.OUTSIDE_OPTION_EACH
-    elif a.decision_a_fase1 == 'continuar':
-        if b.decision_b_fase1 == 'compartir':
+    elif a_decision == 'continuar':
+        if b_decision == 'compartir':
             a.pago_fase1 = C.SHARE_AMOUNT
             b.pago_fase1 = C.SHARE_AMOUNT
-        elif b.decision_b_fase1 == 'no_compartir':
+        elif b_decision == 'no_compartir':
             a.pago_fase1 = cu(0)
             b.pago_fase1 = C.DOUBLED_AMOUNT
         else:
@@ -380,20 +402,278 @@ def set_payoffs_fase2(group: Group):
     a = group.a_player()
     b = group.b_player()
 
-    if a.decision_a_fase2 == 'no_continuar':
+    a_decision = a.field_maybe_none('decision_a_fase2') if a else None
+    b_decision = b.field_maybe_none('decision_b_fase2') if b else None
+
+    if a_decision == 'no_continuar':
         a.pago_fase2 = C.OUTSIDE_OPTION_EACH
         b.pago_fase2 = C.OUTSIDE_OPTION_EACH
-    elif a.decision_a_fase2 == 'continuar':
-        if b.decision_b_fase2 == 'compartir':
+    elif a_decision == 'continuar':
+        if b_decision == 'compartir':
             a.pago_fase2 = C.SHARE_AMOUNT
             b.pago_fase2 = C.SHARE_AMOUNT
-        elif b.decision_b_fase2 == 'no_compartir':
+        elif b_decision == 'no_compartir':
             a.pago_fase2 = cu(0)
             b.pago_fase2 = C.DOUBLED_AMOUNT
         else:
             a.pago_fase2 = cu(0)
             b.pago_fase2 = cu(0)
 
+
+# ----------------------------------------------------------------
+# AUXILIARES DE PAGOS DETERMINÍSTICOS
+# ----------------------------------------------------------------
+
+def interval_index(interval_code):
+    mapping = {
+        '0_20': 0,
+        '20_40': 1,
+        '40_60': 2,
+        '60_80': 3,
+        '80_100': 4,
+    }
+    return mapping.get(interval_code)
+
+
+def percentage_to_interval_code(value):
+    if value is None:
+        return None
+    if value < 20:
+        return '0_20'
+    elif value < 40:
+        return '20_40'
+    elif value < 60:
+        return '40_60'
+    elif value < 80:
+        return '60_80'
+    else:
+        return '80_100'
+
+
+def modal_response(values):
+    counts = {}
+    for v in values:
+        if v is not None:
+            counts[v] = counts.get(v, 0) + 1
+
+    if not counts:
+        return None
+
+    max_count = max(counts.values())
+    modals = [k for k, v in counts.items() if v == max_count]
+    return min(modals)
+
+
+def percentage_yes(players, field_name, yes_value):
+    valid_values = []
+
+    for p in players:
+        value = p.field_maybe_none(field_name)
+        if value is not None:
+            valid_values.append(value)
+
+    if len(valid_values) == 0:
+        return None
+
+    yes_count = sum(1 for value in valid_values if value == yes_value)
+    return 100 * yes_count / len(valid_values)
+
+
+# ----------------------------------------------------------------
+# NORMAS
+# ----------------------------------------------------------------
+
+def score_norm_question(answer, modal):
+    return 1.0 if answer == modal else 0.0
+
+
+def compute_norms_payoffs(subsession: Subsession):
+    normas_players = [
+        p for p in subsession.in_round(1).get_players()
+        if p.condicion_inicial == 'normas'
+    ]
+
+    if not normas_players:
+        return
+
+    modal_1 = modal_response([p.field_maybe_none('norma_no_continuar') for p in normas_players])
+    modal_2 = modal_response([p.field_maybe_none('norma_continuar_a') for p in normas_players])
+    modal_3 = modal_response([p.field_maybe_none('norma_b_no_compartir') for p in normas_players])
+    modal_4 = modal_response([p.field_maybe_none('norma_b_compartir') for p in normas_players])
+
+    for p in normas_players:
+        scores = [
+            score_norm_question(p.field_maybe_none('norma_no_continuar'), modal_1),
+            score_norm_question(p.field_maybe_none('norma_continuar_a'), modal_2),
+            score_norm_question(p.field_maybe_none('norma_b_no_compartir'), modal_3),
+            score_norm_question(p.field_maybe_none('norma_b_compartir'), modal_4),
+        ]
+
+        avg_score = sum(scores) / 4
+        p.score_normas = avg_score
+        p.pago_normas = cu(4 * avg_score)
+
+
+# ----------------------------------------------------------------
+# CREENCIAS
+# ----------------------------------------------------------------
+
+def score_interval_prediction(predicted_interval_code, realized_interval_code):
+    pred = interval_index(predicted_interval_code)
+    real = interval_index(realized_interval_code)
+
+    if pred is None or real is None:
+        return 0.0
+
+    distance = abs(pred - real)
+    if distance == 0:
+        return 1.0
+    elif distance == 1:
+        return 0.15625
+    else:
+        return 0.0
+
+
+def score_binary_prediction(predicted_value, realized_value):
+    if predicted_value is None or realized_value is None:
+        return 0.0
+    return 0.5 if predicted_value == realized_value else 0.0
+
+
+def compute_belief_payoffs_fase1(subsession: Subsession):
+    round1_players = subsession.in_round(1).get_players()
+
+    trust_A = [p for p in round1_players if p.condicion_inicial == 'trust' and p.rol == 'A']
+    trust_B = [p for p in round1_players if p.condicion_inicial == 'trust' and p.rol == 'B']
+
+    pct_b_share = percentage_yes(trust_B, 'decision_b_fase1', 'compartir')
+    pct_a_continue = percentage_yes(trust_A, 'decision_a_fase1', 'continuar')
+
+    realized_b_share_code = percentage_to_interval_code(pct_b_share)
+    realized_a_continue_code = percentage_to_interval_code(pct_a_continue)
+
+    for p in round1_players:
+        if p.condicion_inicial != 'trust':
+            continue
+
+        if p.rol == 'A':
+            s = score_interval_prediction(
+                p.field_maybe_none('creencia_a_fase1'),
+                realized_b_share_code
+            )
+            p.score_creencias_fase1 = s
+            p.pago_creencias_fase1 = cu(4 * s)
+
+        elif p.rol == 'B':
+            a = p.group.a_player()
+
+            a_creencia = a.field_maybe_none('creencia_a_fase1') if a else None
+            a_decision = a.field_maybe_none('decision_a_fase1') if a else None
+
+            s1 = score_interval_prediction(
+                p.field_maybe_none('creencia_b1_fase1'),
+                a_creencia
+            )
+            s2 = score_binary_prediction(
+                p.field_maybe_none('creencia_b2_fase1'),
+                a_decision
+            )
+            s3 = score_interval_prediction(
+                p.field_maybe_none('creencia_b3_fase1'),
+                realized_a_continue_code
+            )
+
+            avg_score = (s1 + s2 + s3) / 3
+            p.score_creencias_fase1 = avg_score
+            p.pago_creencias_fase1 = cu(4 * avg_score)
+
+
+def compute_belief_payoffs_fase2(subsession: Subsession):
+    round2_players = subsession.in_round(2).get_players()
+
+    fase2_A = [p for p in round2_players if p.rol == 'A']
+    fase2_B = [p for p in round2_players if p.rol == 'B']
+
+    pct_a_continue = percentage_yes(fase2_A, 'decision_a_fase2', 'continuar')
+    pct_b_share = percentage_yes(fase2_B, 'decision_b_fase2', 'compartir')
+
+    realized_a_continue_code = percentage_to_interval_code(pct_a_continue)
+    realized_b_share_code = percentage_to_interval_code(pct_b_share)
+
+    for p in round2_players:
+        if p.rol == 'A':
+            s1 = score_interval_prediction(
+                p.field_maybe_none('creencia_a1_fase2'),
+                realized_a_continue_code
+            )
+            s2 = score_interval_prediction(
+                p.field_maybe_none('creencia_a2_fase2'),
+                realized_b_share_code
+            )
+
+            avg_score = (s1 + s2) / 2
+            p.score_creencias_fase2 = avg_score
+            p.pago_creencias_fase2 = cu(4 * avg_score)
+        else:
+            p.score_creencias_fase2 = 0
+            p.pago_creencias_fase2 = cu(0)
+
+
+# ----------------------------------------------------------------
+# PAGO FINAL
+# ----------------------------------------------------------------
+
+def set_final_payoff(player: Player):
+    origen = player.condicion_inicial
+
+    # -------------------------------------------------
+    # GRUPO 1: solo hizo normas + juego 2
+    # -------------------------------------------------
+    if origen == 'normas':
+        rama = random.choice(['normas', 'trust_fase2'])
+        player.rama_pago_seleccionada = rama
+
+        if rama == 'normas':
+            player.fase_pago_seleccionada = 'fase1'
+            player.pago_seleccionado_label = 'Normas sociales - Fase 1'
+            player.payoff = player.in_round(1).pago_normas
+
+        elif rama == 'trust_fase2':
+            player.fase_pago_seleccionada = 'fase2'
+            player.pago_seleccionado_label = 'Juego de confianza - Fase 2'
+            player.payoff = player.in_round(2).pago_fase2
+
+    # -------------------------------------------------
+    # GRUPO 2: hizo juego 1 + juego 2 + creencias 1 + creencias 2
+    # -------------------------------------------------
+    elif origen == 'trust':
+        rama = random.choice([
+            'trust_fase1',
+            'trust_fase2',
+            'creencias_fase1',
+            'creencias_fase2',
+        ])
+        player.rama_pago_seleccionada = rama
+
+        if rama == 'trust_fase1':
+            player.fase_pago_seleccionada = 'fase1'
+            player.pago_seleccionado_label = 'Actividad de interacción - Fase 1'
+            player.payoff = player.in_round(1).pago_fase1
+
+        elif rama == 'trust_fase2':
+            player.fase_pago_seleccionada = 'fase2'
+            player.pago_seleccionado_label = 'Actividad de interacción - Fase 2'
+            player.payoff = player.in_round(2).pago_fase2
+
+        elif rama == 'creencias_fase1':
+            player.fase_pago_seleccionada = 'fase1'
+            player.pago_seleccionado_label = 'Predicciones - Fase 1'
+            player.payoff = player.in_round(1).pago_creencias_fase1
+
+        elif rama == 'creencias_fase2':
+            player.fase_pago_seleccionada = 'fase2'
+            player.pago_seleccionado_label = 'Predicciones - Fase 2'
+            player.payoff = player.in_round(2).pago_creencias_fase2
 
 # ----------------------------------------------------------------
 # PÁGINAS INICIALES
@@ -411,6 +691,8 @@ class Consentimiento(Page):
     def error_message(player, values):
         if not values.get('acepta'):
             return "Debe aceptar para continuar."
+
+
 class Bienvenida(Page):
     @staticmethod
     def is_displayed(player: Player):
@@ -620,7 +902,8 @@ class DecisionBFase1(Page):
         if not player.es_trust_fase1_B():
             return False
         a = player.group.a_player()
-        return a is not None and a.decision_a_fase1 == 'continuar'
+        a_decision = a.field_maybe_none('decision_a_fase1') if a else None
+        return a is not None and a_decision == 'continuar'
 
     @staticmethod
     def error_message(player, values):
@@ -634,7 +917,8 @@ class ANoContinuoFase1(Page):
         if not player.es_trust_fase1_B():
             return False
         a = player.group.a_player()
-        return a is not None and a.decision_a_fase1 == 'no_continuar'
+        a_decision = a.field_maybe_none('decision_a_fase1') if a else None
+        return a is not None and a_decision == 'no_continuar'
 
 
 class WaitForFinalResultsFase1(WaitPage):
@@ -649,6 +933,21 @@ class WaitForFinalResultsFase1(WaitPage):
     body_text = "Por favor espere mientras se calculan los resultados."
 
 
+class EsperaFinFase1(WaitPage):
+    wait_for_all_groups = True
+    title_text = "Esperando a los demás participantes"
+    body_text = "Por favor espere. La Fase 2 comenzará cuando todos los participantes hayan terminado la Fase 1."
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+    @staticmethod
+    def after_all_players_arrive(subsession: Subsession):
+        compute_norms_payoffs(subsession)
+        compute_belief_payoffs_fase1(subsession)
+
+
 class ResultadosFase1(Page):
     @staticmethod
     def is_displayed(player: Player):
@@ -659,27 +958,33 @@ class ResultadosFase1(Page):
         if player.es_normas():
             return dict(
                 mensaje_resultado_fase1="Ha finalizado la Fase 1.",
-                pago_fase1=player.pago_fase1,
+                pago_fase1=player.pago_normas,
+                pago_creencias_fase1=None,
+                mostrar_detalle_trust=False,
             )
 
         a = player.group.a_player()
         b = player.group.b_player()
 
+        a_decision = a.field_maybe_none('decision_a_fase1') if a else None
+        b_decision = b.field_maybe_none('decision_b_fase1') if b else None
+        own_b_decision = player.field_maybe_none('decision_b_fase1')
+
         if player.rol == 'A':
-            if player.decision_a_fase1 == 'no_continuar':
+            if a_decision == 'no_continuar':
                 mensaje = "Usted decidió no continuar. Tanto usted como el Participante B reciben $1."
-            elif player.decision_a_fase1 == 'continuar' and b.decision_b_fase1 == 'compartir':
+            elif a_decision == 'continuar' and b_decision == 'compartir':
                 mensaje = "El Participante B decidió COMPARTIR. Tanto usted como el Participante B reciben $2."
-            elif player.decision_a_fase1 == 'continuar' and b.decision_b_fase1 == 'no_compartir':
+            elif a_decision == 'continuar' and b_decision == 'no_compartir':
                 mensaje = "El Participante B decidió NO COMPARTIR. Usted recibe $0."
             else:
                 mensaje = "Resultado no disponible."
         else:
-            if a.decision_a_fase1 == 'no_continuar':
+            if a_decision == 'no_continuar':
                 mensaje = "El Participante A decidió NO CONTINUAR. Ambos reciben $1."
-            elif a.decision_a_fase1 == 'continuar' and player.decision_b_fase1 == 'compartir':
+            elif a_decision == 'continuar' and own_b_decision == 'compartir':
                 mensaje = "Usted decidió COMPARTIR. Ambos reciben $2."
-            elif a.decision_a_fase1 == 'continuar' and player.decision_b_fase1 == 'no_compartir':
+            elif a_decision == 'continuar' and own_b_decision == 'no_compartir':
                 mensaje = "Usted decidió NO COMPARTIR. Usted recibe $4 y el Participante A recibe $0."
             else:
                 mensaje = "Resultado no disponible."
@@ -687,17 +992,9 @@ class ResultadosFase1(Page):
         return dict(
             mensaje_resultado_fase1=mensaje,
             pago_fase1=player.pago_fase1,
+            pago_creencias_fase1=player.pago_creencias_fase1,
+            mostrar_detalle_trust=True,
         )
-
-class EsperaFinFase1(WaitPage):
-    wait_for_all_groups = True
-    title_text = "Esperando a los demás participantes"
-    body_text = "Por favor espere. La Fase 2 comenzará cuando todos los participantes hayan terminado la Fase 1."
-
-    @staticmethod
-    def is_displayed(player: Player):
-        return player.round_number == 1
-    
 
 
 # ----------------------------------------------------------------
@@ -791,7 +1088,8 @@ class DecisionBFase2(Page):
         if not player.es_fase2_B():
             return False
         a = player.group.a_player()
-        return a is not None and a.decision_a_fase2 == 'continuar'
+        a_decision = a.field_maybe_none('decision_a_fase2') if a else None
+        return a is not None and a_decision == 'continuar'
 
     @staticmethod
     def error_message(player, values):
@@ -805,7 +1103,8 @@ class ANoContinuoFase2(Page):
         if not player.es_fase2_B():
             return False
         a = player.group.a_player()
-        return a is not None and a.decision_a_fase2 == 'no_continuar'
+        a_decision = a.field_maybe_none('decision_a_fase2') if a else None
+        return a is not None and a_decision == 'no_continuar'
 
 
 class WaitForFinalResultsFase2(WaitPage):
@@ -819,6 +1118,12 @@ class WaitForFinalResultsFase2(WaitPage):
     def after_all_players_arrive(group: Group):
         set_payoffs_fase2(group)
 
+        subsession = group.subsession
+        compute_belief_payoffs_fase2(subsession)
+
+        for p in group.get_players():
+            set_final_payoff(p)
+
 
 class ResultadosFase2(Page):
     @staticmethod
@@ -830,28 +1135,48 @@ class ResultadosFase2(Page):
         a = player.group.a_player()
         b = player.group.b_player()
 
+        a_decision = a.field_maybe_none('decision_a_fase2') if a else None
+        b_decision = b.field_maybe_none('decision_b_fase2') if b else None
+        own_b_decision = player.field_maybe_none('decision_b_fase2')
+
         if player.rol == 'A':
-            if player.decision_a_fase2 == 'no_continuar':
+            if a_decision == 'no_continuar':
                 mensaje = "Usted decidió no continuar. Tanto usted como el Participante B reciben $1."
-            elif player.decision_a_fase2 == 'continuar' and b.decision_b_fase2 == 'compartir':
+            elif a_decision == 'continuar' and b_decision == 'compartir':
                 mensaje = "El Participante B decidió COMPARTIR. Tanto usted como el Participante B reciben $2."
-            elif player.decision_a_fase2 == 'continuar' and b.decision_b_fase2 == 'no_compartir':
+            elif a_decision == 'continuar' and b_decision == 'no_compartir':
                 mensaje = "El Participante B decidió NO COMPARTIR. Usted recibe $0."
             else:
                 mensaje = "Resultado no disponible."
         else:
-            if a.decision_a_fase2 == 'no_continuar':
+            if a_decision == 'no_continuar':
                 mensaje = "El Participante A decidió NO CONTINUAR. Ambos reciben $1."
-            elif a.decision_a_fase2 == 'continuar' and player.decision_b_fase2 == 'compartir':
+            elif a_decision == 'continuar' and own_b_decision == 'compartir':
                 mensaje = "Usted decidió COMPARTIR. Ambos reciben $2."
-            elif a.decision_a_fase2 == 'continuar' and player.decision_b_fase2 == 'no_compartir':
+            elif a_decision == 'continuar' and own_b_decision == 'no_compartir':
                 mensaje = "Usted decidió NO COMPARTIR. Usted recibe $4 y el Participante A recibe $0."
             else:
                 mensaje = "Resultado no disponible."
 
+        # Participantes que originalmente estuvieron en normas
+        if player.condicion_inicial == 'normas':
+            return dict(
+                mensaje_resultado_fase2=mensaje,
+                pago_fase2=player.pago_fase2,
+                pago_normas=player.in_round(1).pago_normas,
+                pago_creencias_fase2=None,
+                mostrar_detalle_normas=True,
+                mostrar_detalle_trust=False,
+            )
+
+        # Participantes que originalmente estuvieron en trust
         return dict(
             mensaje_resultado_fase2=mensaje,
             pago_fase2=player.pago_fase2,
+            pago_normas=None,
+            pago_creencias_fase2=player.pago_creencias_fase2,
+            mostrar_detalle_normas=False,
+            mostrar_detalle_trust=True,
         )
 
 
@@ -881,8 +1206,15 @@ class Cierre(Page):
     @staticmethod
     def vars_for_template(player: Player):
         return dict(
-            pago_fase1=player.in_round(1).pago_fase1,
-            pago_fase2=player.pago_fase2,
+            pago_fase1=player.in_round(1).pago_fase1 or cu(0),
+            pago_fase2=player.pago_fase2 or cu(0),
+            pago_normas=player.in_round(1).pago_normas or cu(0),
+            pago_creencias_fase1=player.in_round(1).pago_creencias_fase1 or cu(0),
+            pago_creencias_fase2=player.pago_creencias_fase2 or cu(0),
+            fase_pago_seleccionada=player.fase_pago_seleccionada,
+            pago_seleccionado_label=player.pago_seleccionado_label,
+            pago_final=player.payoff or cu(0),
+            es_grupo_normas=(player.condicion_inicial == 'normas'),
         )
 
 
@@ -913,8 +1245,8 @@ page_sequence = [
     DecisionBFase1,
     ANoContinuoFase1,
     WaitForFinalResultsFase1,
-    ResultadosFase1,
     EsperaFinFase1,
+    ResultadosFase1,
 
     TransicionFase2,
 

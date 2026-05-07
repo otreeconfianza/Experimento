@@ -6,9 +6,19 @@ Resultados de la Fase 1
 
 <p>{{ mensaje_resultado_fase1 }}</p>
 
-<p>
-Ganancia registrada en esta fase: <strong>{{ pago_fase1 }}</strong>
-</p>
+{% if mostrar_detalle_trust %}
+    <p>
+        Ganancia por sus predicciones en esta fase: <strong>{{ pago_creencias_fase1 }}</strong>
+    </p>
+
+    <p>
+        Ganancia por la actividad de interacción en esta fase: <strong>{{ pago_fase1 }}</strong>
+    </p>
+{% else %}
+    <p>
+        Ganancia por su evaluación de normas sociales en esta fase: <strong>{{ pago_fase1 }}</strong>
+    </p>
+{% endif %}
 
 {{ next_button }}
 

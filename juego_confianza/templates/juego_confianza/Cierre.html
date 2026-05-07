@@ -1,5 +1,5 @@
 {{ block title }}
-Fin del experimento
+Cierre del experimento
 {{ endblock }}
 
 {{ block content }}
@@ -8,20 +8,51 @@ Fin del experimento
 Ha finalizado el experimento. Muchas gracias por su participación.
 </p>
 
+<hr>
+
 <p>
-Ganancia registrada en la Fase 1: <strong>{{ pago_fase1 }}</strong>
+<strong>La fase seleccionada para su pago fue:</strong>
+{% if fase_pago_seleccionada == 'fase1' %}
+    Fase 1
+{% elif fase_pago_seleccionada == 'fase2' %}
+    Fase 2
+{% else %}
+    No disponible
+{% endif %}
 </p>
 
 <p>
-Ganancia registrada en la Fase 2: <strong>{{ pago_fase2 }}</strong>
+<strong>La actividad seleccionada para su pago fue:</strong> {{ pago_seleccionado_label }}
+</p>
+
+<hr>
+
+<p>
+<strong>Resumen de ganancias registradas:</strong>
+</p>
+
+{% if es_grupo_normas %}
+    <ul>
+        <li>Normas sociales: <strong>{{ pago_normas }}</strong></li>
+        <li>Juego de confianza - Fase 2: <strong>{{ pago_fase2 }}</strong></li>
+    </ul>
+{% else %}
+    <ul>
+        <li>Juego de confianza - Fase 1: <strong>{{ pago_fase1 }}</strong></li>
+        <li>Creencias - Fase 1: <strong>{{ pago_creencias_fase1 }}</strong></li>
+        <li>Juego de confianza - Fase 2: <strong>{{ pago_fase2 }}</strong></li>
+        <li>Creencias - Fase 2: <strong>{{ pago_creencias_fase2 }}</strong></li>
+    </ul>
+{% endif %}
+
+<hr>
+
+<p>
+<strong>Pago final del experimento: {{ pago_final }}</strong>
 </p>
 
 <p>
-Recuerde que, de acuerdo con las instrucciones generales, una de las actividades será seleccionada al azar para determinar el pago final correspondiente.
-</p>
-
-<p>
-Si tiene alguna duda, por favor permanezca en su lugar y espere instrucciones de los organizadores.
+Por favor, permanezca en su lugar hasta recibir nuevas indicaciones.
 </p>
 
 {{ endblock }}
