@@ -57,15 +57,9 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    # -------------------------
-    # Asignación experimental
-    # -------------------------
     condicion_inicial = models.StringField(blank=True)   # 'trust' o 'normas'
     rol = models.StringField(blank=True)                 # 'A', 'B', 'Normas'
 
-    # -------------------------
-    # Consentimiento
-    # -------------------------
     acepta = models.BooleanField(
         label="Acepto participar en este experimento",
         choices=[[True, "Sí, acepto participar"]],
@@ -226,9 +220,6 @@ class Player(BasePlayer):
     rama_pago_seleccionada = models.StringField(blank=True)
     pago_seleccionado_label = models.StringField(blank=True)
 
-    # -------------------------
-    # Auxiliares
-    # -------------------------
     def es_normas(self):
         return self.round_number == 1 and self.condicion_inicial == 'normas'
 
@@ -344,7 +335,6 @@ def asignar_round_2(subsession: Subsession):
             p.condicion_inicial = 'trust'
             p.rol = 'A'
             fase2_A.append(p)
-
         elif origen == 'normas':
             p.condicion_inicial = 'normas'
             p.rol = 'B'
@@ -428,7 +418,7 @@ def set_payoffs_fase2(group: Group):
 
 
 # ----------------------------------------------------------------
-# AUXILIARES DE PAGOS DETERMINÍSTICOS
+# AUXILIARES
 # ----------------------------------------------------------------
 
 def interval_index(interval_code):
@@ -522,29 +512,29 @@ def compute_norms_payoffs(subsession: Subsession):
 
 
 # ----------------------------------------------------------------
-# CREENCIAS
+# CREENCIAS - NUEVA VERSIÓN ENTERA
 # ----------------------------------------------------------------
 
-def score_interval_prediction(predicted_interval_code, realized_interval_code):
+def score_interval_points(predicted_interval_code, realized_interval_code, exact_points=2, adjacent_points=1):
     pred = interval_index(predicted_interval_code)
     real = interval_index(realized_interval_code)
 
     if pred is None or real is None:
-        return 0.0
+        return 0
 
     distance = abs(pred - real)
     if distance == 0:
-        return 1.0
+        return exact_points
     elif distance == 1:
-        return 0.15625
+        return adjacent_points
     else:
-        return 0.0
+        return 0
 
 
-def score_binary_prediction(predicted_value, realized_value):
+def score_binary_points(predicted_value, realized_value, correct_points=1):
     if predicted_value is None or realized_value is None:
-        return 0.0
-    return 0.5 if predicted_value == realized_value else 0.0
+        return 0
+    return correct_points if predicted_value == realized_value else 0
 
 
 def compute_belief_payoffs_fase1(subsession: Subsession):
@@ -564,12 +554,14 @@ def compute_belief_payoffs_fase1(subsession: Subsession):
             continue
 
         if p.rol == 'A':
-            s = score_interval_prediction(
+            points = score_interval_points(
                 p.field_maybe_none('creencia_a_fase1'),
-                realized_b_share_code
+                realized_b_share_code,
+                exact_points=4,
+                adjacent_points=2,
             )
-            p.score_creencias_fase1 = s
-            p.pago_creencias_fase1 = cu(4 * s)
+            p.score_creencias_fase1 = points / 4
+            p.pago_creencias_fase1 = cu(points)
 
         elif p.rol == 'B':
             a = p.group.a_player()
@@ -577,22 +569,27 @@ def compute_belief_payoffs_fase1(subsession: Subsession):
             a_creencia = a.field_maybe_none('creencia_a_fase1') if a else None
             a_decision = a.field_maybe_none('decision_a_fase1') if a else None
 
-            s1 = score_interval_prediction(
+            s1 = score_interval_points(
                 p.field_maybe_none('creencia_b1_fase1'),
-                a_creencia
+                a_creencia,
+                exact_points=2,
+                adjacent_points=1,
             )
-            s2 = score_binary_prediction(
+            s2 = score_binary_points(
                 p.field_maybe_none('creencia_b2_fase1'),
-                a_decision
+                a_decision,
+                correct_points=1,
             )
-            s3 = score_interval_prediction(
+            s3 = score_interval_points(
                 p.field_maybe_none('creencia_b3_fase1'),
-                realized_a_continue_code
+                realized_a_continue_code,
+                exact_points=1,
+                adjacent_points=0,
             )
 
-            avg_score = (s1 + s2 + s3) / 3
-            p.score_creencias_fase1 = avg_score
-            p.pago_creencias_fase1 = cu(4 * avg_score)
+            points = s1 + s2 + s3
+            p.score_creencias_fase1 = points / 4
+            p.pago_creencias_fase1 = cu(points)
 
 
 def compute_belief_payoffs_fase2(subsession: Subsession):
@@ -609,18 +606,22 @@ def compute_belief_payoffs_fase2(subsession: Subsession):
 
     for p in round2_players:
         if p.rol == 'A':
-            s1 = score_interval_prediction(
+            s1 = score_interval_points(
                 p.field_maybe_none('creencia_a1_fase2'),
-                realized_a_continue_code
+                realized_a_continue_code,
+                exact_points=2,
+                adjacent_points=1,
             )
-            s2 = score_interval_prediction(
+            s2 = score_interval_points(
                 p.field_maybe_none('creencia_a2_fase2'),
-                realized_b_share_code
+                realized_b_share_code,
+                exact_points=2,
+                adjacent_points=1,
             )
 
-            avg_score = (s1 + s2) / 2
-            p.score_creencias_fase2 = avg_score
-            p.pago_creencias_fase2 = cu(4 * avg_score)
+            points = s1 + s2
+            p.score_creencias_fase2 = points / 4
+            p.pago_creencias_fase2 = cu(points)
         else:
             p.score_creencias_fase2 = 0
             p.pago_creencias_fase2 = cu(0)
@@ -1154,22 +1155,20 @@ class ResultadosFase2(Page):
             else:
                 mensaje = "Resultado no disponible."
 
+        # Grupo 1: en fase 2 solo mostrar actividad de interacción
         if player.condicion_inicial == 'normas':
             return dict(
                 mensaje_resultado_fase2=mensaje,
                 pago_fase2=player.pago_fase2,
-                pago_normas=player.in_round(1).pago_normas,
                 pago_creencias_fase2=None,
-                mostrar_detalle_normas=True,
                 mostrar_detalle_trust=False,
             )
 
+        # Grupo 2: mostrar predicciones + actividad de interacción
         return dict(
             mensaje_resultado_fase2=mensaje,
             pago_fase2=player.pago_fase2,
-            pago_normas=None,
             pago_creencias_fase2=player.pago_creencias_fase2,
-            mostrar_detalle_normas=False,
             mostrar_detalle_trust=True,
         )
 

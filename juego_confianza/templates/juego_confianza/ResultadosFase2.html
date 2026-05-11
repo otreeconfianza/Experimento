@@ -6,27 +6,15 @@ Resultados de la Fase 2
 
 <p>{{ mensaje_resultado_fase2 }}</p>
 
-{% if mostrar_detalle_normas %}
-    <p>
-        Ganancia por su evaluación respuestas modales: <strong>{{ pago_normas }}</strong>
-    </p>
-
-    <p>
-        Ganancia por la actividad de interacción en esta fase: <strong>{{ pago_fase2 }}</strong>
-    </p>
-{% elif mostrar_detalle_trust %}
+{% if mostrar_detalle_trust %}
     <p>
         Ganancia por sus predicciones en esta fase: <strong>{{ pago_creencias_fase2 }}</strong>
     </p>
-
-    <p>
-        Ganancia por la actividad de interacción en esta fase: <strong>{{ pago_fase2 }}</strong>
-    </p>
-{% else %}
-    <p>
-        Ganancia registrada en esta fase: <strong>{{ pago_fase2 }}</strong>
-    </p>
 {% endif %}
+
+<p>
+    Ganancia por la actividad de interacción en esta fase: <strong>{{ pago_fase2 }}</strong>
+</p>
 
 {{ next_button }}
 
