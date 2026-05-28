@@ -133,22 +133,43 @@ class Player(BasePlayer):
     # Fase 1 - normas
     # -------------------------
     norma_no_continuar = models.IntegerField(
-        choices=[1, 2, 3, 4],
+        choices=[
+    [1, '1 - Muy inapropiada'],
+    [2, '2 - Algo inapropiada'],
+    [3, '3 - Algo apropiada'],
+    [4, '4 - Muy apropiada'],
+],
         label="¿En qué medida considerará la mayoría de la gente que esta acción es socialmente apropiada?"
     )
 
     norma_continuar_a = models.IntegerField(
-        choices=[1, 2, 3, 4],
+        choices=[
+    [1, '1 - Muy inapropiada'],
+    [2, '2 - Algo inapropiada'],
+    [3, '3 - Algo apropiada'],
+    [4, '4 - Muy apropiada'],
+],
         label="¿En qué medida considerará la mayoría de la gente que esta acción es socialmente apropiada?"
     )
 
     norma_b_no_compartir = models.IntegerField(
-        choices=[1, 2, 3, 4],
+       choices=[
+    [1, '1 - Muy inapropiada'],
+    [2, '2 - Algo inapropiada'],
+    [3, '3 - Algo apropiada'],
+    [4, '4 - Muy apropiada'],
+],
+
         label="¿En qué medida considerará la mayoría de la gente que esta acción es socialmente apropiada?"
     )
 
     norma_b_compartir = models.IntegerField(
-        choices=[1, 2, 3, 4],
+        choices=[
+    [1, '1 - Muy inapropiada'],
+    [2, '2 - Algo inapropiada'],
+    [3, '3 - Algo apropiada'],
+    [4, '4 - Muy apropiada'],
+],
         label="¿En qué medida considerará la mayoría de la gente que esta acción es socialmente apropiada?"
     )
 
