@@ -1,0 +1,134 @@
+<button type="button" class="help-button" onclick="abrirAyuda()">
+    ?
+</button>
+
+<div id="modalAyuda" class="help-modal">
+    <div class="help-modal-content">
+        <span class="help-close" onclick="cerrarAyuda()">&times;</span>
+
+        <h3>Recordatorio del juego</h3>
+
+        <p>
+            En esta actividad participan dos personas: el <strong>Participante A</strong>
+            y el <strong>Participante B</strong>.
+        </p>
+
+        <p>
+            El <strong>Participante A</strong> recibe un monto inicial. Primero debe decidir
+            si desea <strong>continuar</strong> o <strong>no continuar</strong> con la actividad.
+        </p>
+
+        <p>
+            Si el <strong>Participante A decide no continuar</strong>, el monto inicial se divide
+            en partes iguales entre el Participante A y el Participante B.
+        </p>
+
+        <p>
+            Si el <strong>Participante A decide continuar</strong>, entrega el monto al
+            Participante B. Ese monto se multiplica antes de llegar al Participante B.
+        </p>
+
+        <p>
+            Luego, el <strong>Participante B</strong> decide entre <strong>compartir</strong>
+            o <strong>no compartir</strong> el monto recibido.
+        </p>
+
+        <p>
+            Si el Participante B comparte, el monto se divide entre ambos participantes.
+            Si no comparte, el Participante B conserva la totalidad del monto recibido.
+        </p>
+
+        <p>
+            La ganancia final depende de la decisión del Participante A y, si corresponde,
+            de la decisión del Participante B.
+        </p>
+
+        <p>
+            Este recordatorio solo resume las reglas generales del juego. No muestra resultados
+            ni indica qué decisión tomar.
+        </p>
+    </div>
+</div>
+
+<style>
+    .help-button {
+        position: fixed !important;
+        bottom: 25px !important;
+        right: 25px !important;
+        width: 52px !important;
+        height: 52px !important;
+        border-radius: 50% !important;
+        border: none !important;
+        background-color: #2c3e50 !important;
+        color: white !important;
+        font-size: 28px !important;
+        font-weight: bold !important;
+        cursor: pointer !important;
+        z-index: 999999 !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.25) !important;
+    }
+
+    .help-button:hover {
+        background-color: #1a252f !important;
+    }
+
+    .help-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        background-color: rgba(0,0,0,0.45);
+    }
+
+    .help-modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 25px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .help-modal-content h3 {
+        margin-top: 0;
+        color: #2c3e50;
+    }
+
+    .help-close {
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #555;
+    }
+
+    .help-close:hover {
+        color: black;
+    }
+</style>
+
+<script>
+    function abrirAyuda() {
+        document.getElementById("modalAyuda").style.display = "block";
+    }
+
+    function cerrarAyuda() {
+        document.getElementById("modalAyuda").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        let modal = document.getElementById("modalAyuda");
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
