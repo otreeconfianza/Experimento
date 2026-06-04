@@ -661,7 +661,7 @@ def set_final_payoff(player: Player):
 
         if rama == 'normas':
             player.fase_pago_seleccionada = 'fase1'
-            player.pago_seleccionado_label = 'Normas sociales - Fase 1'
+            player.pago_seleccionado_label = 'Respuestas modales - Fase 1'
             player.payoff = player.in_round(1).pago_normas
 
         elif rama == 'trust_fase2':
@@ -1024,7 +1024,6 @@ class ResultadosFase1(Page):
 # ----------------------------------------------------------------
 # TRANSICIÓN A ROUND 2
 # ----------------------------------------------------------------
-
 class TransicionFase2(Page):
     @staticmethod
     def is_displayed(player: Player):
@@ -1033,9 +1032,10 @@ class TransicionFase2(Page):
     @staticmethod
     def vars_for_template(player: Player):
         return dict(
-            rol_fase2=player.descripcion_fase2()
+            rol_fase2=player.descripcion_fase2(),
+            es_A=player.rol == 'A',
+            es_B=player.rol == 'B',
         )
-
 
 # ----------------------------------------------------------------
 # ROUND 2
@@ -1291,7 +1291,6 @@ page_sequence = [
     DecisionBFase2,
     ANoContinuoFase2,
     WaitForFinalResultsFase2,
-    ResultadosFase2,
 
     EsperaPagoFinalFase2,
 

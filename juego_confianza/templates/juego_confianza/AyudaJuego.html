@@ -8,49 +8,67 @@
 
         <h3>Recordatorio del juego</h3>
 
+        {% if player.rol == 'A' %}
+            <p class="rol-recordatorio">
+                En esta fase, usted participa como <strong>Participante A</strong>.
+            </p>
+        {% elif player.rol == 'B' %}
+            <p class="rol-recordatorio">
+                En esta fase, usted participa como <strong>Participante B</strong>.
+            </p>
+        {% endif %}
+
         <p>
-            En esta actividad participan dos personas: el <strong>Participante A</strong>
-            y el <strong>Participante B</strong>.
+            Participan dos personas: <strong>Participante A</strong> y <strong>Participante B</strong>.
         </p>
 
         <p>
-            El <strong>Participante A</strong> recibe un monto inicial. Primero debe decidir
-            si desea <strong>continuar</strong> o <strong>no continuar</strong> con la actividad.
+            El <strong>Participante A</strong> recibe un monto inicial y decide entre
+            <strong>continuar</strong> o <strong>no continuar</strong>.
         </p>
 
         <p>
-            Si el <strong>Participante A decide no continuar</strong>, el monto inicial se divide
-            en partes iguales entre el Participante A y el Participante B.
+            Si decide <strong>no continuar</strong>, el monto se divide en partes iguales.
         </p>
 
         <p>
-            Si el <strong>Participante A decide continuar</strong>, entrega el monto al
-            Participante B. Ese monto se multiplica antes de llegar al Participante B.
+            Si decide <strong>continuar</strong>, el monto se transfiere al
+            <strong>Participante B</strong> y se duplica.
         </p>
 
         <p>
-            Luego, el <strong>Participante B</strong> decide entre <strong>compartir</strong>
-            o <strong>no compartir</strong> el monto recibido.
+            Luego, el <strong>Participante B</strong> decide entre
+            <strong>compartir</strong> o <strong>no compartir</strong>.
         </p>
 
         <p>
-            Si el Participante B comparte, el monto se divide entre ambos participantes.
-            Si no comparte, el Participante B conserva la totalidad del monto recibido.
+            Si comparte, el monto se divide entre ambos. Si no comparte, el
+            Participante B conserva la totalidad.
         </p>
 
-        <p>
-            La ganancia final depende de la decisión del Participante A y, si corresponde,
-            de la decisión del Participante B.
-        </p>
-
-        <p>
-            Este recordatorio solo resume las reglas generales del juego. No muestra resultados
-            ni indica qué decisión tomar.
+        <p class="nota-ayuda">
+            Este recordatorio no muestra resultados ni sugiere qué decisión tomar.
         </p>
     </div>
 </div>
 
 <style>
+    .rol-recordatorio {
+        background-color: #f1f5f9;
+        border-left: 4px solid #2c3e50;
+        padding: 10px 12px;
+        margin-bottom: 18px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+
+    .nota-ayuda {
+        margin-top: 18px;
+        font-size: 15px;
+        color: #555;
+        font-style: italic;
+    }
+
     .help-button {
         position: fixed !important;
         bottom: 25px !important;
@@ -90,7 +108,7 @@
         padding: 25px;
         border-radius: 10px;
         width: 90%;
-        max-width: 700px;
+        max-width: 650px;
         max-height: 80vh;
         overflow-y: auto;
         box-shadow: 0 5px 20px rgba(0,0,0,0.3);

@@ -5,13 +5,28 @@ Pregunta 2
 {{ block content }}
 
 <p>
-Suponga que el Participante A decide <strong>CONTINUAR</strong> participando, es decir, entregar el dinero al Participante B, quien lo recibe duplicado
-y puede decidir si devolver algo al Participante A o no.
+    Suponga que el Participante A decide <strong>CONTINUAR</strong> participando de la actividad,
+    es decir, entregar el monto inicial al Participante B. Ese monto se duplica antes de llegar
+    al Participante B.
 </p>
 
-{{ formfields }}
+<p>
+    ¿En qué medida considera que la mayoría de los participantes evaluará esta decisión del
+    <strong>Participante A</strong> como socialmente apropiada?
+</p>
+
+<div class="opciones-norma">
+    {{ form.norma_continuar_a }}
+</div>
+
 {{ next_button }}
 
 {{ include_sibling 'AyudaJuego.html' }}
+
+<style>
+    .opciones-norma {
+        margin-bottom: 30px;
+    }
+</style>
 
 {{ endblock }}

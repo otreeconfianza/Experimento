@@ -5,12 +5,27 @@ Pregunta 1
 {{ block content }}
 
 <p>
-Suponga que el Participante A decide <strong>NO CONTINUAR</strong> participando de la actividad, con lo cual el monto inicial se divide en partes iguales.
+    Suponga que el Participante A decide <strong>NO CONTINUAR</strong> participando de la actividad,
+    con lo cual el monto inicial se divide en partes iguales entre el Participante A y el Participante B.
 </p>
 
-{{ formfields }}
+<p>
+    ¿En qué medida considera que la mayoría de los participantes evaluará esta decisión del
+    <strong>Participante A</strong> como socialmente apropiada?
+</p>
+
+<div class="opciones-norma">
+    {{ form.norma_no_continuar }}
+</div>
+
 {{ next_button }}
 
 {{ include_sibling 'AyudaJuego.html' }}
+
+<style>
+    .opciones-norma {
+        margin-bottom: 30px;
+    }
+</style>
 
 {{ endblock }}

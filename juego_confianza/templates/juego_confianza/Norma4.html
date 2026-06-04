@@ -5,13 +5,32 @@ Pregunta 4
 {{ block content }}
 
 <p>
-Suponga que el Participante A decide <strong>CONTINUAR</strong>, transfiere el dinero al Participante B, quien lo recibe duplicado,
-y el Participante B decide <strong>COMPARTIR</strong>, es decir, enviar la mitad del monto recibido al Participante A.
+    Suponga que el Participante A decide <strong>CONTINUAR</strong>, el monto se transfiere al
+    Participante B y este lo recibe duplicado.
 </p>
 
-{{ formfields }}
+<p>
+    Luego, el Participante B decide <strong>COMPARTIR</strong>, es decir, dividir el monto recibido
+    entre ambos participantes.
+</p>
+
+<p>
+    ¿En qué medida considera que la mayoría de los participantes evaluará esta decisión del
+    <strong>Participante B</strong> como socialmente apropiada?
+</p>
+
+<div class="opciones-norma">
+    {{ form.norma_b_compartir }}
+</div>
+
 {{ next_button }}
 
 {{ include_sibling 'AyudaJuego.html' }}
+
+<style>
+    .opciones-norma {
+        margin-bottom: 30px;
+    }
+</style>
 
 {{ endblock }}

@@ -11,23 +11,6 @@ Ha finalizado el experimento. Muchas gracias por su participación.
 <hr>
 
 <p>
-<strong>La fase seleccionada para su pago fue:</strong>
-{% if fase_pago_seleccionada == 'fase1' %}
-    Fase 1
-{% elif fase_pago_seleccionada == 'fase2' %}
-    Fase 2
-{% else %}
-    No disponible
-{% endif %}
-</p>
-
-<p>
-<strong>La actividad seleccionada para su pago fue:</strong> {{ pago_seleccionado_label }}
-</p>
-
-<hr>
-
-<p>
 <strong>Resumen de ganancias registradas:</strong>
 </p>
 
@@ -46,6 +29,9 @@ Ha finalizado el experimento. Muchas gracias por su participación.
 {% endif %}
 
 <hr>
+<p>
+<strong>La actividad seleccionada para su pago fue:</strong> {{ pago_seleccionado_label }}
+</p>
 
 <p>
 <strong>Pago final del experimento: {{ pago_final }}</strong>
