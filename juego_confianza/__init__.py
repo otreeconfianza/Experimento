@@ -224,6 +224,18 @@ class Player(BasePlayer):
         choices=['Mujer', 'Varón', 'Otro', 'Prefiero no responder'],
         label="Género"
     )
+    riesgo_general = models.IntegerField(
+    label=(
+        "Indique, en términos generales, en qué medida está dispuesto "
+        "o no a asumir riesgos. Utilice una escala del 0 al 10, en la "
+        "que 0 significa «totalmente reacio a asumir riesgos» y 10 "
+        "significa que está «muy dispuesto a asumir riesgos». Puede "
+        "utilizar cualquier número entre 0 y 10 para indicar en qué "
+        "punto de la escala se encuentra, como 0, 1, 2, 3, 4, 5, 6, "
+        "7, 8, 9, 10."
+    ),
+    choices=[[i, str(i)] for i in range(0, 11)],
+)
     comentario_final = models.LongStringField(blank=True, label="Comentario final (opcional)")
 
     # -------------------------
@@ -1220,7 +1232,12 @@ class EsperaPagoFinalFase2(WaitPage):
 
 class CuestionarioFinal(Page):
     form_model = 'player'
-    form_fields = ['edad', 'genero', 'comentario_final']
+    form_fields = [
+        'edad',
+        'genero',
+        'riesgo_general',
+        'comentario_final',
+    ]
 
     @staticmethod
     def is_displayed(player: Player):
@@ -1228,10 +1245,12 @@ class CuestionarioFinal(Page):
 
     @staticmethod
     def error_message(player, values):
-        if values.get('edad') is None or not values.get('genero'):
+        if (
+            values.get('edad') is None
+            or not values.get('genero')
+            or values.get('riesgo_general') is None
+        ):
             return "Debe completar los campos obligatorios para continuar."
-
-
 class Cierre(Page):
     @staticmethod
     def is_displayed(player: Player):
