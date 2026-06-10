@@ -1,21 +1,27 @@
 {{ block title }}
-Predcciones
+Predicciones
 {{ endblock }}
 
 {{ block content }}
 
 <p>
-Al Participante A se le ha solicitado estimar el porcentaje de Participantes B que elegirán <strong>COMPARTIR</strong>.
+    Al Participante A se le ha solicitado estimar el porcentaje de
+    Participantes B que elegirán <strong>COMPARTIR</strong>.
 </p>
 
 <p>
-1. ¿Qué intervalo cree que eligió el Participante A?
+    1. ¿Qué intervalo cree que eligió el Participante A?
 </p>
 
-{{ formfields }}
+{{ form.creencia_b1_fase1 }}
+<br><br>
 {{ next_button }}
+
 <p style="color: #6c757d; font-size: 0.95em;">
-    <em>Si esta pregunta es seleccionada para el pago, puede ganar un monto adicional dependiendo de la precisión de su predicción.</em>
+    <em>
+        Si esta pregunta es seleccionada para el pago, puede ganar
+        un monto adicional dependiendo de la precisión de su predicción.
+    </em>
 </p>
 
 {{ include_sibling 'AyudaJuego.html' }}

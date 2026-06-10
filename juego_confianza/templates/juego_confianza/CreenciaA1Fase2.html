@@ -5,14 +5,21 @@ Predicciones
 {{ block content }}
 
 <p>
-1. ¿Qué porcentaje de participantes A cree que optará por <strong>CONTINUAR</strong> participando en esta segunda ronda?
+    1. ¿Qué porcentaje de participantes A cree que optará por
+    <strong>CONTINUAR</strong> participando en esta segunda ronda?
 </p>
 
-{{ formfields }}
+{{ form.creencia_a1_fase2 }}
+<br><br>
 {{ next_button }}
+
 <p style="color: #6c757d; font-size: 0.95em;">
-    <em>Si esta pregunta es seleccionada para el pago, puede ganar un monto adicional dependiendo de la precisión de su predicción.</em>
+    <em>
+        Si esta pregunta es seleccionada para el pago, puede ganar
+        un monto adicional dependiendo de la precisión de su predicción.
+    </em>
 </p>
+
 {{ include_sibling 'AyudaJuego.html' }}
 
 {{ endblock }}

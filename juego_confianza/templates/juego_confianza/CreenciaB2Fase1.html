@@ -5,14 +5,20 @@ Predicciones
 {{ block content }}
 
 <p>
-2.¿Qué decisión cree usted que tomará el Participante A?
+    2. ¿Qué decisión cree usted que tomará el Participante A?
 </p>
 
-{{ formfields }}
+{{ form.creencia_b2_fase1 }}
+<br><br>
 {{ next_button }}
+
 <p style="color: #6c757d; font-size: 0.95em;">
-    <em>Si esta pregunta es seleccionada para el pago, puede ganar un monto adicional dependiendo de la precisión de su predicción.</em>
+    <em>
+        Si esta pregunta es seleccionada para el pago, puede ganar
+        un monto adicional dependiendo de la precisión de su predicción.
+    </em>
 </p>
+
 {{ include_sibling 'AyudaJuego.html' }}
 
 {{ endblock }}

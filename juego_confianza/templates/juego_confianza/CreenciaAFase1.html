@@ -5,18 +5,26 @@ Predicciones
 {{ block content }}
 
 <p>
-Como se explicó anteriormente, cada Participante B que reciba un monto de dinero por parte de un Participante A, una vez duplicado el monto,
-deberá decidir si transferir o no una parte de este al Participante A.
+    Como se explicó anteriormente, cada Participante B que reciba un
+    monto de dinero por parte de un Participante A, una vez duplicado
+    el monto, deberá decidir si transferir o no una parte de este al
+    Participante A.
 </p>
 
 <p>
-1. Indique qué porcentaje de sujetos B en su sesión cree usted que elegirá <strong>COMPARTIR</strong>.
+    1. Indique qué porcentaje de sujetos B en su sesión cree usted que
+    elegirá <strong>COMPARTIR</strong>.
 </p>
 
-{{ formfields }}
+{{ form.creencia_a_fase1 }}
+<br><br>
 {{ next_button }}
+
 <p style="color: #6c757d; font-size: 0.95em;">
-    <em>Si esta pregunta es seleccionada para el pago, puede ganar un monto adicional dependiendo de la precisión de su predicción.</em>
+    <em>
+        Si esta pregunta es seleccionada para el pago, puede ganar
+        un monto adicional dependiendo de la precisión de su predicción.
+    </em>
 </p>
 
 {{ include_sibling 'AyudaJuego.html' }}

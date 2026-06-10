@@ -726,7 +726,7 @@ class Bienvenida(Page):
 class EsperaInicioExperimento(WaitPage):
     wait_for_all_groups = True
     title_text = "Esperando a los demás participantes"
-    body_text = "Por favor espere. El experimento comenzará cuando todos los participantes hayan presionado Siguiente."
+    body_text = "Por favor espere. El experimento comenzará para todos los participantes al mismo tiempo."
 
     @staticmethod
     def is_displayed(player: Player):
@@ -959,8 +959,12 @@ class WaitForFinalResultsFase1(WaitPage):
 
 class EsperaFinFase1(WaitPage):
     wait_for_all_groups = True
-    title_text = "Esperando a los demás participantes"
-    body_text = "Por favor espere. La Fase 2 comenzará cuando todos los participantes hayan terminado la Fase 1."
+    title_text = "Usted ha completado la Fase 1."
+    body_text = (
+        "Por favor espere. La Fase 2 comenzará cuando todos los "
+        "participantes hayan terminado la Fase 1. La información sobre "
+        "resultados y pagos será presentada al finalizar toda la actividad."
+    )
 
     @staticmethod
     def is_displayed(player: Player):
@@ -970,7 +974,6 @@ class EsperaFinFase1(WaitPage):
     def after_all_players_arrive(subsession: Subsession):
         compute_norms_payoffs(subsession)
         compute_belief_payoffs_fase1(subsession)
-
 
 class ResultadosFase1(Page):
     @staticmethod
@@ -1251,7 +1254,6 @@ class Cierre(Page):
 
 page_sequence = [
     Consentimiento,
-    Bienvenida,
     EsperaInicioExperimento,
     ExplicacionGeneral,
     AsignacionInicial,
@@ -1277,7 +1279,6 @@ page_sequence = [
     ANoContinuoFase1,
     WaitForFinalResultsFase1,
     EsperaFinFase1,
-    ResultadosFase1,
 
     TransicionFase2,
 
