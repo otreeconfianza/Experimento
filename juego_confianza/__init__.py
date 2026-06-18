@@ -102,10 +102,24 @@ class Player(BasePlayer):
 
     creencia_b2_fase1 = models.StringField(
         choices=[
-            ['no_continuar', 'NO CONTINUAR y dividir el monto en partes iguales'],
-            ['continuar', 'CONTINUAR y entregar el monto al participante B'],
+            [
+                'no_continuar',
+                'NO CONTINUAR y dividir el monto '
+                'en partes iguales'
+            ],
+            [
+                'continuar',
+                'CONTINUAR y entregarle a usted '
+                '(Participante B) el monto, '
+                'el cual se duplicará y usted deberá '
+                'decidir si compartir la mitad con A '
+                'o quedarse con la totalidad.'
+            ],
         ],
-        label="¿Qué decisión cree usted que tomará el Participante A?"
+        label=(
+            "¿Qué decisión cree usted que tomará "
+            "el participante A?"
+        )
     )
 
     creencia_b3_fase1 = models.StringField(
@@ -116,17 +130,27 @@ class Player(BasePlayer):
             ['60_80', '60–80%'],
             ['80_100', '80–100%'],
         ],
-        label="Estime qué porcentaje de participantes A elegirá CONTINUAR:"
+        label=(
+            "Estime qué porcentaje de participantes A "
+            "elegirá CONTINUAR:"
+        )
     )
 
     decision_b_fase1 = models.StringField(
         choices=[
-            ['compartir', 'COMPARTIR: dividir el dinero en partes iguales'],
-            ['no_compartir', 'NO COMPARTIR: quedarse con la totalidad'],
+            [
+                'compartir',
+                'COMPARTIR: dividir el dinero '
+                'en partes iguales'
+            ],
+            [
+                'no_compartir',
+                'NO COMPARTIR: quedarse '
+                'con la totalidad'
+            ],
         ],
         label="Elija una de las siguientes opciones:"
     )
-
     pago_fase1 = models.CurrencyField(initial=0)
 
     # -------------------------
@@ -271,15 +295,25 @@ class Player(BasePlayer):
     def descripcion_asignacion_inicial(self):
         if self.condicion_inicial == 'normas':
             return 'Usted ha sido asignado al Grupo 1.'
-        elif self.condicion_inicial == 'trust':
-            return f'Usted ha sido asignado al Grupo 2: Su rol en la Fase 1 es Participante {self.rol}.'
+
+        if self.condicion_inicial == 'trust':
+            return 'Usted ha sido asignado al Grupo 2.'
+
         return ''
 
     def descripcion_fase2(self):
         if self.rol == 'A':
-            return 'En la Fase 2, usted ha sido asignado al rol de Participante A.'
-        elif self.rol == 'B':
-            return 'En la Fase 2, usted ha sido asignado al rol de Participante B.'
+            return (
+                'En la Fase 2, usted ha sido asignado '
+                'al rol de Participante A.'
+            )
+
+        if self.rol == 'B':
+            return (
+                'En la Fase 2, usted ha sido asignado '
+                'al rol de Participante B.'
+            )
+
         return ''
 
 
@@ -960,22 +994,32 @@ class ANoContinuoFase1(Page):
 class WaitForFinalResultsFase1(WaitPage):
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == 1 and player.condicion_inicial == 'trust'
+        return (
+            player.round_number == 1
+            and player.condicion_inicial == 'trust'
+        )
 
     @staticmethod
     def after_all_players_arrive(group: Group):
         set_payoffs_fase1(group)
 
-    body_text = "Por favor espere mientras se calculan los resultados."
+    body_text = (
+        "Por favor espere mientras se calculan "
+        "los resultados."
+    )
 
 
 class EsperaFinFase1(WaitPage):
     wait_for_all_groups = True
+
     title_text = "Usted ha completado la Fase 1."
+
     body_text = (
-        "Por favor espere. La Fase 2 comenzará cuando todos los "
-        "participantes hayan terminado la Fase 1. La información sobre "
-        "resultados y pagos será presentada al finalizar toda la actividad."
+        "A continuación, comenzará la siguiente parte "
+        "del experimento. "
+        "La información definitiva sobre resultados "
+        "y pagos correspondientes será presentada "
+        "al finalizar toda la actividad."
     )
 
     @staticmethod
@@ -987,52 +1031,84 @@ class EsperaFinFase1(WaitPage):
         compute_norms_payoffs(subsession)
         compute_belief_payoffs_fase1(subsession)
 
+
 class ResultadosFase1(Page):
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == 1
+        return (
+            player.round_number == 1
+            and player.condicion_inicial == 'trust'
+        )
 
     @staticmethod
     def vars_for_template(player: Player):
-        if player.es_normas():
-            return dict(
-                mensaje_resultado_fase1="Ha finalizado la Fase 1.",
-                pago_fase1=player.pago_normas,
-                pago_creencias_fase1=None,
-                mostrar_detalle_trust=False,
-            )
-
         a = player.group.a_player()
         b = player.group.b_player()
 
-        a_decision = a.field_maybe_none('decision_a_fase1') if a else None
-        b_decision = b.field_maybe_none('decision_b_fase1') if b else None
-        own_b_decision = player.field_maybe_none('decision_b_fase1')
+        a_decision = (
+            a.field_maybe_none('decision_a_fase1')
+            if a
+            else None
+        )
+
+        b_decision = (
+            b.field_maybe_none('decision_b_fase1')
+            if b
+            else None
+        )
 
         if player.rol == 'A':
             if a_decision == 'no_continuar':
-                mensaje = "Usted decidió no continuar. Tanto usted como el Participante B reciben $1."
-            elif a_decision == 'continuar' and b_decision == 'compartir':
-                mensaje = "El Participante B decidió COMPARTIR. Tanto usted como el Participante B reciben $2."
-            elif a_decision == 'continuar' and b_decision == 'no_compartir':
-                mensaje = "El Participante B decidió NO COMPARTIR. Usted recibe $0."
-            else:
-                mensaje = "Resultado no disponible."
-        else:
-            if a_decision == 'no_continuar':
-                mensaje = "El Participante A decidió NO CONTINUAR. Ambos reciben $1."
-            elif a_decision == 'continuar' and own_b_decision == 'compartir':
-                mensaje = "Usted decidió COMPARTIR. Ambos reciben $2."
-            elif a_decision == 'continuar' and own_b_decision == 'no_compartir':
-                mensaje = "Usted decidió NO COMPARTIR. Usted recibe $4 y el Participante A recibe $0."
+                mensaje = (
+                    "Usted ha decidido NO CONTINUAR. "
+                    "Tanto usted como el Participante B "
+                    "reciben $1."
+                )
+
+            elif b_decision == 'compartir':
+                mensaje = (
+                    "El Participante B decidió COMPARTIR "
+                    "el monto duplicado. Tanto usted como "
+                    "el Participante B reciben $2."
+                )
+
+            elif b_decision == 'no_compartir':
+                mensaje = (
+                    "El Participante B decidió NO COMPARTIR "
+                    "y quedarse con los $4. Usted recibe $0."
+                )
+
             else:
                 mensaje = "Resultado no disponible."
 
+        elif player.rol == 'B':
+            if a_decision == 'no_continuar':
+                mensaje = (
+                    "El Participante A decidió NO CONTINUAR. "
+                    "Tanto usted como el Participante A "
+                    "reciben $1."
+                )
+
+            elif b_decision == 'compartir':
+                mensaje = (
+                    "Usted ha decidido COMPARTIR: "
+                    "tanto usted como A reciben $2."
+                )
+
+            elif b_decision == 'no_compartir':
+                mensaje = (
+                    "Usted ha decidido NO COMPARTIR: "
+                    "se queda con $4."
+                )
+
+            else:
+                mensaje = "Resultado no disponible."
+
+        else:
+            mensaje = "Resultado no disponible."
+
         return dict(
             mensaje_resultado_fase1=mensaje,
-            pago_fase1=player.pago_fase1,
-            pago_creencias_fase1=player.pago_creencias_fase1,
-            mostrar_detalle_trust=True,
         )
 
 
@@ -1295,8 +1371,8 @@ page_sequence = [
 
     WaitForADecisionFase1,
     DecisionBFase1,
-    ANoContinuoFase1,
     WaitForFinalResultsFase1,
+    ResultadosFase1,
     EsperaFinFase1,
 
     TransicionFase2,

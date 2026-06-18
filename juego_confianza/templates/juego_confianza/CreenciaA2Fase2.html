@@ -1,25 +1,29 @@
 {{ block title }}
-Predicciones
+Predicción 2
 {{ endblock }}
 
 {{ block content }}
 
 <p>
-    2. ¿Qué porcentaje de participantes B cree que optará por
-    <strong>COMPARTIR</strong> en esta segunda ronda?
+    Considerando la situación descripta anteriormente
+    (que puede consultar en el botón de ayuda),
+    estime qué porcentaje de participantes B
+    elegirá <strong>COMPARTIR</strong>
+    en esta segunda fase.
 </p>
 
-{{ form.creencia_a2_fase2 }}
-<br><br>
+<div class="opciones-prediccion">
+    {{ form.creencia_a2_fase2 }}
+</div>
+
 {{ next_button }}
 
-<p style="color: #6c757d; font-size: 0.95em;">
-    <em>
-        Si esta pregunta es seleccionada para el pago, puede ganar
-        un monto adicional dependiendo de la precisión de su predicción.
-    </em>
-</p>
-
 {{ include_sibling 'AyudaJuego.html' }}
+
+<style>
+    .opciones-prediccion {
+        margin-bottom: 30px;
+    }
+</style>
 
 {{ endblock }}

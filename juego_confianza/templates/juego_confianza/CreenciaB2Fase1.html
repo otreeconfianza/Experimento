@@ -1,24 +1,32 @@
 {{ block title }}
-Predicciones
+Predicción 2
 {{ endblock }}
 
 {{ block content }}
 
 <p>
-    2. ¿Qué decisión cree usted que tomará el Participante A?
+    ¿Qué decisión cree usted que tomará
+    el participante A?
 </p>
 
-{{ form.creencia_b2_fase1 }}
-<br><br>
+<div class="opciones-prediccion">
+    {{ form.creencia_b2_fase1 }}
+</div>
+
+<p>
+    Si su respuesta coincide con lo que
+    efectivamente decide el participante A,
+    podrá obtener una ganancia de xx.
+</p>
+
 {{ next_button }}
 
-<p style="color: #6c757d; font-size: 0.95em;">
-    <em>
-        Si esta pregunta es seleccionada para el pago, puede ganar
-        un monto adicional dependiendo de la precisión de su predicción.
-    </em>
-</p>
-
 {{ include_sibling 'AyudaJuego.html' }}
+
+<style>
+    .opciones-prediccion {
+        margin-bottom: 30px;
+    }
+</style>
 
 {{ endblock }}

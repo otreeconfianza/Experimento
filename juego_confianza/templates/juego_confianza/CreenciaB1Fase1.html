@@ -1,29 +1,58 @@
 {{ block title }}
-Predicciones
+PREDICCIONES
 {{ endblock }}
 
 {{ block content }}
 
 <p>
-    Al Participante A se le ha solicitado estimar el porcentaje de
-    Participantes B que elegirán <strong>COMPARTIR</strong>.
+    A continuación, se le solicitará que realice
+    algunas predicciones sobre las decisiones
+    de los otros jugadores.
 </p>
 
 <p>
-    1. ¿Qué intervalo cree que eligió el Participante A?
+    Si esta parte es seleccionada para el pago,
+    usted podrá obtener una ganancia en función
+    de la precisión de sus respuestas
+    (se sumará lo obtenido en cada una).
 </p>
 
-{{ form.creencia_b1_fase1 }}
-<br><br>
+<h4>Predicción 1</h4>
+
+<p>
+    Considerando la situación descripta anteriormente
+    (que puede consultar en el botón de ayuda),
+    al Participante A se le ha solicitado estimar
+    el porcentaje de Participantes B
+    que elegirán <strong>COMPARTIR</strong>.
+</p>
+
+<p>
+    ¿Qué intervalo cree que eligió
+    el Participante A?
+</p>
+
+<div class="opciones-prediccion">
+    {{ form.creencia_b1_fase1 }}
+</div>
+
+<p>
+    Si el valor real se encuentra dentro
+    del intervalo elegido,
+    recibirá un pago adicional de XXX;
+    de lo contrario,
+    no podrá obtener un pago adicional
+    por esa estimación.
+</p>
+
 {{ next_button }}
 
-<p style="color: #6c757d; font-size: 0.95em;">
-    <em>
-        Si esta pregunta es seleccionada para el pago, puede ganar
-        un monto adicional dependiendo de la precisión de su predicción.
-    </em>
-</p>
-
 {{ include_sibling 'AyudaJuego.html' }}
+
+<style>
+    .opciones-prediccion {
+        margin-bottom: 30px;
+    }
+</style>
 
 {{ endblock }}

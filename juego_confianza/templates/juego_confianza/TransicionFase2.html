@@ -10,41 +10,33 @@ Inicio de la Fase 2
 
 {{ if es_A }}
 
-    <p>
-        En esta fase se realizará una actividad similar a la anterior, pero usted interactuará
-        con un nuevo participante.
-    </p>
+<p>
+    En esta fase se realizará una actividad
+    similar a la anterior,
+    pero usted interactuará
+    con un nuevo participante.
+</p>
 
-    <p>
-        {{ rol_fase2 }}
-    </p>
+{{ elif es_B }}
 
-    <p>
-        A continuación verá las instrucciones correspondientes a su rol en esta segunda fase.
-    </p>
-
-{{ endif }}
-
-{{ if es_B }}
-
-    <p>
-        En esta fase se realizará una actividad similar a la analizada anteriormente.
-    </p>
-
-    <p>
-        Sin embargo, en esta segunda fase usted formará parte de esta actividad de interacción
-        como participante del experimento.
-    </p>
-
-    <p>
-        {{ rol_fase2 }}
-    </p>
-
-    <p>
-        A continuación verá las instrucciones correspondientes a su rol en esta segunda fase.
-    </p>
+<p>
+    En esta fase se realizará una actividad
+    similar a la analizada anteriormente,
+    pero ahora usted formará parte
+    de esta actividad de interacción.
+</p>
 
 {{ endif }}
+
+<p>
+    {{ rol_fase2 }}
+</p>
+
+<p>
+    A continuación verá las instrucciones
+    correspondientes a su rol
+    en esta segunda fase.
+</p>
 
 {{ next_button }}
 

@@ -1,25 +1,44 @@
 {{ block title }}
-Predicciones
+PREDICCIONES
 {{ endblock }}
 
 {{ block content }}
 
 <p>
-    1. ¿Qué porcentaje de participantes A cree que optará por
-    <strong>CONTINUAR</strong> participando en esta segunda ronda?
+    A continuación, se le solicitará que realice
+    dos predicciones sobre las decisiones
+    de los otros participantes
+    en esta segunda fase.
 </p>
 
-{{ form.creencia_a1_fase2 }}
-<br><br>
+<p>
+    Si esta parte es seleccionada para el pago,
+    usted podrá obtener una ganancia
+    en función de la precisión de sus respuestas.
+</p>
+
+<h4>Predicción 1</h4>
+
+<p>
+    Considerando la situación descripta anteriormente
+    (que puede consultar en el botón de ayuda),
+    estime qué porcentaje de participantes A
+    elegirá <strong>CONTINUAR</strong>
+    en esta segunda fase.
+</p>
+
+<div class="opciones-prediccion">
+    {{ form.creencia_a1_fase2 }}
+</div>
+
 {{ next_button }}
 
-<p style="color: #6c757d; font-size: 0.95em;">
-    <em>
-        Si esta pregunta es seleccionada para el pago, puede ganar
-        un monto adicional dependiendo de la precisión de su predicción.
-    </em>
-</p>
-
 {{ include_sibling 'AyudaJuego.html' }}
+
+<style>
+    .opciones-prediccion {
+        margin-bottom: 30px;
+    }
+</style>
 
 {{ endblock }}

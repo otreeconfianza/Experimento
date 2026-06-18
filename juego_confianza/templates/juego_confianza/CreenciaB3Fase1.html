@@ -1,25 +1,37 @@
 {{ block title }}
-Predicciones
+Predicción 3
 {{ endblock }}
 
 {{ block content }}
 
 <p>
-    3. Estime qué porcentaje de participantes A elegirá
-    <strong>CONTINUAR</strong>.
+    Considerando la situación descripta anteriormente
+    (que puede consultar en el botón de ayuda),
+    estime qué porcentaje de participantes A
+    elegirá <strong>CONTINUAR</strong>.
 </p>
 
-{{ form.creencia_b3_fase1 }}
-<br><br>
+<div class="opciones-prediccion">
+    {{ form.creencia_b3_fase1 }}
+</div>
+
+<p>
+    Si el valor real se encuentra dentro
+    del intervalo elegido,
+    recibirá un pago adicional de XXX;
+    de lo contrario,
+    no podrá obtener un pago adicional
+    por esa estimación.
+</p>
+
 {{ next_button }}
 
-<p style="color: #6c757d; font-size: 0.95em;">
-    <em>
-        Si esta pregunta es seleccionada para el pago, puede ganar
-        un monto adicional dependiendo de la precisión de su predicción.
-    </em>
-</p>
-
 {{ include_sibling 'AyudaJuego.html' }}
+
+<style>
+    .opciones-prediccion {
+        margin-bottom: 30px;
+    }
+</style>
 
 {{ endblock }}

@@ -5,28 +5,29 @@ Instrucciones
 {{ block content }}
 
 <p>
-    Usted fue asignado al rol de <strong>Participante B</strong> en esta fase.
+    A usted le ha sido asignado el rol de
+    “<strong>Participante B</strong>”
+    y ha sido emparejado en forma anónima
+    y aleatoria con un
+    “<strong>Participante A</strong>”.
 </p>
 
 <p>
-    Será emparejado con un nuevo <strong>Participante A</strong>.
+    En esta fase,
+    dependiendo de la decisión
+    del Participante A,
+    podría tener que tomar una decisión.
 </p>
 
 <p>
-    Su participación dependerá de la decisión que tome el <strong>Participante A</strong>.
+    Si esta parte es seleccionada para el pago,
+    su ganancia dependerá de su decisión
+    y de la que previamente haya tomado
+    el Participante A.
 </p>
-
-<ul>
-    <li>
-        Si el <strong>Participante A</strong> decide <strong>NO CONTINUAR</strong>, 
-        la actividad finaliza y ambos participantes reciben la mitad del monto inicial.
-    </li>
-    <li>
-        Si el <strong>Participante A</strong> decide <strong>CONTINUAR</strong>, 
-        usted deberá decidir si comparte o no el monto recibido.
-    </li>
-</ul>
 
 {{ next_button }}
+
+{{ include_sibling 'AyudaJuego.html' }}
 
 {{ endblock }}

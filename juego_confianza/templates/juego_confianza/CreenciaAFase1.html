@@ -1,32 +1,46 @@
 {{ block title }}
-Predicciones
+PREDICCIONES
 {{ endblock }}
 
 {{ block content }}
 
 <p>
-    Como se explicó anteriormente, cada Participante B que reciba un
-    monto de dinero por parte de un Participante A, una vez duplicado
-    el monto, deberá decidir si transferir o no una parte de este al
-    Participante A.
+    Si esta pregunta es seleccionada para el pago,
+    podrá obtener una ganancia dependiendo
+    de la precisión de su predicción:
+    Si el valor real se encuentra dentro del intervalo
+    que usted eligió, podrá recibir un monto de xxx.
+    De lo contrario, no obtendrá ganancias
+    en esta instancia.
 </p>
 
 <p>
-    1. Indique qué porcentaje de sujetos B en su sesión cree usted que
-    elegirá <strong>COMPARTIR</strong>.
+    Como se explicó anteriormente,
+    cada Participante B que reciba un monto de dinero
+    por parte de un Participante A,
+    una vez duplicado el monto,
+    deberá decidir si transferir o no
+    una parte de éste al Participante A.
 </p>
 
-{{ form.creencia_a_fase1 }}
-<br><br>
+<p>
+    1. ¿Qué porcentaje de sujetos B en su sesión
+    cree usted que elegirá
+    <strong>COMPARTIR</strong>?
+</p>
+
+<div class="opciones-prediccion">
+    {{ form.creencia_a_fase1 }}
+</div>
+
 {{ next_button }}
 
-<p style="color: #6c757d; font-size: 0.95em;">
-    <em>
-        Si esta pregunta es seleccionada para el pago, puede ganar
-        un monto adicional dependiendo de la precisión de su predicción.
-    </em>
-</p>
-
 {{ include_sibling 'AyudaJuego.html' }}
+
+<style>
+    .opciones-prediccion {
+        margin-bottom: 30px;
+    }
+</style>
 
 {{ endblock }}
