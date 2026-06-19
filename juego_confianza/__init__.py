@@ -1033,12 +1033,31 @@ class EsperaFinFase1(WaitPage):
 
 
 class ResultadosFase1(Page):
+
     @staticmethod
     def is_displayed(player: Player):
-        return (
-            player.round_number == 1
-            and player.condicion_inicial == 'trust'
+        if (
+            player.round_number != 1
+            or player.condicion_inicial != 'trust'
+        ):
+            return False
+
+        a = player.group.a_player()
+
+        if a is None:
+            return False
+
+        a_decision = a.field_maybe_none(
+            'decision_a_fase1'
         )
+
+        if player.rol == 'A':
+            return True
+
+        if player.rol == 'B':
+            return a_decision == 'continuar'
+
+        return False
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -1046,18 +1065,23 @@ class ResultadosFase1(Page):
         b = player.group.b_player()
 
         a_decision = (
-            a.field_maybe_none('decision_a_fase1')
+            a.field_maybe_none(
+                'decision_a_fase1'
+            )
             if a
             else None
         )
 
         b_decision = (
-            b.field_maybe_none('decision_b_fase1')
+            b.field_maybe_none(
+                'decision_b_fase1'
+            )
             if b
             else None
         )
 
         if player.rol == 'A':
+
             if a_decision == 'no_continuar':
                 mensaje = (
                     "Usted ha decidido NO CONTINUAR. "
@@ -1082,14 +1106,8 @@ class ResultadosFase1(Page):
                 mensaje = "Resultado no disponible."
 
         elif player.rol == 'B':
-            if a_decision == 'no_continuar':
-                mensaje = (
-                    "El Participante A decidió NO CONTINUAR. "
-                    "Tanto usted como el Participante A "
-                    "reciben $1."
-                )
 
-            elif b_decision == 'compartir':
+            if b_decision == 'compartir':
                 mensaje = (
                     "Usted ha decidido COMPARTIR: "
                     "tanto usted como A reciben $2."
@@ -1235,55 +1253,99 @@ class WaitForFinalResultsFase2(WaitPage):
 
 
 class ResultadosFase2(Page):
+
     @staticmethod
     def is_displayed(player: Player):
-        return player.round_number == 2
+        if player.round_number != 2:
+            return False
+
+        a = player.group.a_player()
+
+        if a is None:
+            return False
+
+        a_decision = a.field_maybe_none(
+            'decision_a_fase2'
+        )
+
+        if player.rol == 'A':
+            return True
+
+        if player.rol == 'B':
+            return a_decision == 'continuar'
+
+        return False
 
     @staticmethod
     def vars_for_template(player: Player):
         a = player.group.a_player()
         b = player.group.b_player()
 
-        a_decision = a.field_maybe_none('decision_a_fase2') if a else None
-        b_decision = b.field_maybe_none('decision_b_fase2') if b else None
-        own_b_decision = player.field_maybe_none('decision_b_fase2')
-
-        if player.rol == 'A':
-            if a_decision == 'no_continuar':
-                mensaje = "Usted decidió no continuar. Tanto usted como el Participante B reciben $1."
-            elif a_decision == 'continuar' and b_decision == 'compartir':
-                mensaje = "El Participante B decidió COMPARTIR. Tanto usted como el Participante B reciben $2."
-            elif a_decision == 'continuar' and b_decision == 'no_compartir':
-                mensaje = "El Participante B decidió NO COMPARTIR. Usted recibe $0."
-            else:
-                mensaje = "Resultado no disponible."
-        else:
-            if a_decision == 'no_continuar':
-                mensaje = "El Participante A decidió NO CONTINUAR. Ambos reciben $1."
-            elif a_decision == 'continuar' and own_b_decision == 'compartir':
-                mensaje = "Usted decidió COMPARTIR. Ambos reciben $2."
-            elif a_decision == 'continuar' and own_b_decision == 'no_compartir':
-                mensaje = "Usted decidió NO COMPARTIR. Usted recibe $4 y el Participante A recibe $0."
-            else:
-                mensaje = "Resultado no disponible."
-
-        # Grupo 1: en fase 2 solo mostrar actividad de interacción
-        if player.condicion_inicial == 'normas':
-            return dict(
-                mensaje_resultado_fase2=mensaje,
-                pago_fase2=player.pago_fase2,
-                pago_creencias_fase2=None,
-                mostrar_detalle_trust=False,
+        a_decision = (
+            a.field_maybe_none(
+                'decision_a_fase2'
             )
-
-        # Grupo 2: mostrar predicciones + actividad de interacción
-        return dict(
-            mensaje_resultado_fase2=mensaje,
-            pago_fase2=player.pago_fase2,
-            pago_creencias_fase2=player.pago_creencias_fase2,
-            mostrar_detalle_trust=True,
+            if a
+            else None
         )
 
+        b_decision = (
+            b.field_maybe_none(
+                'decision_b_fase2'
+            )
+            if b
+            else None
+        )
+
+        if player.rol == 'A':
+
+            if a_decision == 'no_continuar':
+                mensaje = (
+                    "Usted ha decidido NO CONTINUAR. "
+                    "Tanto usted como el Participante B "
+                    "reciben $1."
+                )
+
+            elif b_decision == 'compartir':
+                mensaje = (
+                    "El Participante B decidió COMPARTIR "
+                    "el monto duplicado. Tanto usted como "
+                    "el Participante B reciben $2."
+                )
+
+            elif b_decision == 'no_compartir':
+                mensaje = (
+                    "El Participante B decidió "
+                    "NO COMPARTIR y quedarse con los $4. "
+                    "Usted recibe $0."
+                )
+
+            else:
+                mensaje = "Resultado no disponible."
+
+        elif player.rol == 'B':
+
+            if b_decision == 'compartir':
+                mensaje = (
+                    "Usted ha decidido COMPARTIR: "
+                    "tanto usted como A reciben $2."
+                )
+
+            elif b_decision == 'no_compartir':
+                mensaje = (
+                    "Usted ha decidido NO COMPARTIR: "
+                    "se queda con $4."
+                )
+
+            else:
+                mensaje = "Resultado no disponible."
+
+        else:
+            mensaje = "Resultado no disponible."
+
+        return dict(
+            mensaje_resultado_fase2=mensaje,
+        )
 
 class EsperaPagoFinalFase2(WaitPage):
     wait_for_all_groups = True
@@ -1371,6 +1433,7 @@ page_sequence = [
 
     WaitForADecisionFase1,
     DecisionBFase1,
+    ANoContinuoFase1,
     WaitForFinalResultsFase1,
     ResultadosFase1,
     EsperaFinFase1,
@@ -1387,6 +1450,7 @@ page_sequence = [
     DecisionBFase2,
     ANoContinuoFase2,
     WaitForFinalResultsFase2,
+    ResultadosFase2,
 
     EsperaPagoFinalFase2,
 

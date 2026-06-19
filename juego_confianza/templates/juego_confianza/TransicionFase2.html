@@ -4,39 +4,38 @@ Inicio de la Fase 2
 
 {{ block content }}
 
-<p>
-    Ahora comienza la <strong>Fase 2</strong>.
-</p>
-
 {{ if es_A }}
 
 <p>
-    En esta fase se realizará una actividad
-    similar a la anterior,
-    pero usted interactuará
+    En esta fase se realizará una actividad similar
+    a la anterior, pero usted interactuará
     con un nuevo participante.
+</p>
+
+<p>
+    A continuación, verá el rol que le ha sido asignado
+    y las instrucciones correspondientes.
 </p>
 
 {{ elif es_B }}
 
 <p>
-    En esta fase se realizará una actividad
-    similar a la analizada anteriormente,
-    pero ahora usted formará parte
-    de esta actividad de interacción.
+    En esta fase se realizará una actividad similar
+    a la analizada anteriormente.
+</p>
+
+<p>
+    Sin embargo, en este caso usted formará parte
+    de esta actividad de interacción como participante
+    y deberá tomar decisiones.
+</p>
+
+<p>
+    A continuación, verá el rol que le ha sido asignado
+    y las instrucciones correspondientes.
 </p>
 
 {{ endif }}
-
-<p>
-    {{ rol_fase2 }}
-</p>
-
-<p>
-    A continuación verá las instrucciones
-    correspondientes a su rol
-    en esta segunda fase.
-</p>
 
 {{ next_button }}
 

@@ -1,17 +1,16 @@
 {{ block title }}
-Resultados de la Fase 2
 {{ endblock }}
 
 {{ block content }}
 
-{% if mostrar_detalle_trust %}
-    <p>
-        Ganancia por sus predicciones en esta fase: <strong>{{ pago_creencias_fase2 }}</strong>
-    </p>
-{% endif %}
+<p>
+    {{ mensaje_resultado_fase2 }}
+</p>
 
 <p>
-    Ganancia por la actividad de interacción en esta fase: <strong>{{ pago_fase2 }}</strong>
+    Esta ganancia se hará efectiva
+    en caso de que esta instancia
+    sea elegida para el pago.
 </p>
 
 {{ next_button }}
