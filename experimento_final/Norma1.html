@@ -1,0 +1,24 @@
+{{ block title }}Pregunta 1{{ endblock }}
+
+{{ block content }}
+<p>
+    Suponga que el Participante A decide NO CONTINUAR participando de la actividad, con lo cual el
+    monto inicial se divide en partes iguales entre ambos participantes.
+</p>
+
+{{ formfields }}
+
+<p>
+    Si esta parte es seleccionada para el pago, obtendrá una ganancia de hasta $12.000 en función de
+    sus respuestas. Dicha retribución monetaria será otorgada por las respuestas que coincidan con la
+    respuesta modal, es decir por aquellas respuestas elegidas por la mayor cantidad de participantes.
+</p>
+
+<p>
+    Su ganancia estará dada por la suma de lo obtenido en cada pregunta y se hará efectiva en caso de
+    que esta instancia sea elegida para el pago. Cada pregunta correcta sumará $3.000.
+</p>
+
+{{ include_sibling 'AyudaTrust.html' }}
+{{ next_button }}
+{{ endblock }}

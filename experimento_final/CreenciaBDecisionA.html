@@ -1,0 +1,25 @@
+{{ block title }}Predicción 1{{ endblock }}
+
+{{ block content }}
+<p>
+    A continuación, se le solicitará que realice algunas predicciones sobre las decisiones de los otros
+    jugadores.
+</p>
+
+<p>
+    Si esta parte es seleccionada para el pago, usted podrá obtener una ganancia en función de la
+    precisión de sus respuestas (se sumará lo obtenido en cada una).
+</p>
+
+<p><strong>Predicción 1</strong></p>
+
+{{ formfields }}
+
+<p>
+    Si su respuesta coincide con lo que efectivamente decide el participante A, podrá obtener una
+    ganancia de $6.000.
+</p>
+
+{{ include_sibling 'AyudaTrust.html' }}
+{{ next_button }}
+{{ endblock }}

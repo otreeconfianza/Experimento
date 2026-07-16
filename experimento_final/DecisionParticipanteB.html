@@ -1,0 +1,32 @@
+{{ block title }}Decisiones{{ endblock }}
+
+{{ block content }}
+<p>
+    Recuerde que su rol en esta etapa es el de Participante B y ha sido emparejado con un Participante A.
+</p>
+
+<p>
+    El Participante A ha decidido CONTINUAR. Por lo tanto, le ha enviado el monto inicial de $7.000,
+    el cual ha sido duplicado por el sistema, de modo que usted recibe un total de $14.000.
+</p>
+
+<p>Ahora usted debe elegir una de las siguientes opciones:</p>
+
+<ul>
+    <li>
+        <strong>COMPARTIR:</strong> se divide el dinero en partes iguales entre ambos, de modo que
+        cada uno recibe $7.000.
+    </li>
+    <li>
+        <strong>NO COMPARTIR:</strong> usted se queda con la totalidad, de modo que A recibe $0 y
+        usted recibe $14.000
+    </li>
+</ul>
+
+<p>Si esta parte es seleccionada para el pago, usted recibirá el monto resultante de su decisión.</p>
+
+{{ formfields }}
+
+{{ include_sibling 'AyudaTrust.html' }}
+{{ next_button }}
+{{ endblock }}

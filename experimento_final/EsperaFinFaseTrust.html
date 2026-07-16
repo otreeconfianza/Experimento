@@ -1,0 +1,25 @@
+{{ block title }}{{ endblock }}
+
+{{ block content }}
+{{ if participo_en_fase }}
+    {{ if es_fase_1 }}
+        <p>Usted ha completado la Fase 1.</p>
+    {{ elif es_fase_2 }}
+        <p>Usted ha completado la Fase 2.</p>
+    {{ elif es_fase_3 }}
+        <p>Usted ha completado la Fase 3.</p>
+    {{ endif }}
+
+    <p>A continuación, comenzará la siguiente parte del experimento.</p>
+    <p>
+        La información definitiva sobre resultados y pagos correspondientes será presentada al finalizar
+        toda la actividad.
+    </p>
+{{ elif estuvo_inactivo }}
+
+<p>Aguarde a recibir las instrucciones correspondientes</p>
+
+{{ include_sibling 'JuegoDinosaurio.html' }}
+
+{{ endif }}
+{{ endblock }}

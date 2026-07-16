@@ -1,0 +1,145 @@
+{{ block title }}
+Resultados finales de la actividad
+{{ endblock }}
+
+{{ block content }}
+
+<p>
+Ha finalizado la actividad. Muchas gracias por su participación.
+</p>
+
+<hr>
+
+<p>
+<strong>Resumen de ganancias registradas:</strong>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Actividad</th>
+                <th>Ganancia registrada</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {{ if participo_fase_1 }}
+            <tr>
+                <td>Actividad Fase 1</td>
+                <td>
+                    <strong>{{ pago_juego_confianza_f1 }}</strong>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Predicciones - Fase 1</td>
+                <td>
+                    <strong>{{ pago_creencias_f1 }}</strong>
+                </td>
+            </tr>
+            {{ endif }}
+
+            {{ if participo_fase_2 }}
+            <tr>
+                <td>Actividad Fase 2</td>
+                <td>
+                    <strong>{{ pago_juego_confianza_f2 }}</strong>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Predicciones - Fase 2</td>
+                <td>
+                    <strong>{{ pago_creencias_f2 }}</strong>
+                </td>
+            </tr>
+            {{ endif }}
+
+            {{ if participo_fase_3 }}
+            <tr>
+                <td>Actividad Fase 3</td>
+                <td>
+                    <strong>{{ pago_juego_confianza_f3 }}</strong>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Predicciones - Fase 3</td>
+                <td>
+                    <strong>{{ pago_creencias_f3 }}</strong>
+                </td>
+            </tr>
+            {{ endif }}
+
+            <tr>
+                <td>Actividad Fase 4</td>
+                <td>
+                    <strong>{{ pago_dictador }}</strong>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Actividad de evaluación de acciones (Preguntas)</td>
+                <td>
+                    <strong>{{ pago_normas }}</strong>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+</div>
+
+<hr>
+
+<p>
+<strong>La actividad seleccionada para su pago fue:</strong>
+
+{{ if actividad_pago_seleccionada == 'juego_confianza_fase_1' }}
+    Actividad Fase 1
+
+{{ elif actividad_pago_seleccionada == 'creencias_fase_1' }}
+    Predicciones - Fase 1
+
+{{ elif actividad_pago_seleccionada == 'juego_confianza_fase_2' }}
+    Actividad Fase 2
+
+{{ elif actividad_pago_seleccionada == 'creencias_fase_2' }}
+    Predicciones - Fase 2
+
+{{ elif actividad_pago_seleccionada == 'juego_confianza_fase_3' }}
+    Actividad Fase 3
+
+{{ elif actividad_pago_seleccionada == 'creencias_fase_3' }}
+    Predicciones - Fase 3
+
+{{ elif actividad_pago_seleccionada == 'dictador_fase_4' }}
+    Actividad Fase 4
+
+{{ elif actividad_pago_seleccionada == 'normas_fase_4' }}
+    Actividad de evaluación de acciones (Preguntas)
+
+{{ endif }}
+</p>
+
+<p class="pago-final">
+<strong>Pago final de la actividad: {{ pago_final }}</strong>
+</p>
+
+<p>
+Por favor, permanezca en su lugar hasta recibir nuevas indicaciones.
+</p>
+
+<style>
+    .pago-final {
+        margin-top: 20px;
+        padding: 16px;
+        border: 2px solid #2c3e50;
+        border-radius: 8px;
+        font-size: 18px;
+        text-align: center;
+    }
+</style>
+
+{{ endblock }}

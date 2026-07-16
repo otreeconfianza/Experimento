@@ -1,0 +1,256 @@
+<div class="juego-dinosaurio">
+    <p><strong>Juego de espera</strong></p>
+    <p>Presione la barra espaciadora o toque el juego para saltar.</p>
+
+    <canvas
+        id="dinoCanvas"
+        width="700"
+        height="220"
+        aria-label="Juego del dinosaurio">
+    </canvas>
+
+    <p id="dinoPuntaje">Puntaje: 0</p>
+</div>
+
+<style>
+    .juego-dinosaurio {
+        margin-top: 24px;
+        text-align: center;
+    }
+
+    #dinoCanvas {
+        width: 100%;
+        max-width: 700px;
+        height: 220px;
+        border: 1px solid #777;
+        border-radius: 8px;
+        background: #ffffff;
+        touch-action: manipulation;
+    }
+
+    #dinoPuntaje {
+        margin-top: 10px;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('dinoCanvas');
+
+        if (!canvas) {
+            return;
+        }
+
+        const context = canvas.getContext('2d');
+        const puntajeTexto = document.getElementById('dinoPuntaje');
+
+        const sueloY = 180;
+        const gravedad = 0.75;
+        const fuerzaSalto = -13;
+
+        let terminado = false;
+        let puntaje = 0;
+        let velocidad = 6;
+        let contadorObstaculo = 0;
+        let obstaculos = [];
+
+        const dinosaurio = {
+            x: 55,
+            y: sueloY - 42,
+            ancho: 38,
+            alto: 42,
+            velocidadY: 0,
+            saltando: false,
+        };
+
+        function saltar() {
+            if (terminado) {
+                reiniciar();
+                return;
+            }
+
+            if (!dinosaurio.saltando) {
+                dinosaurio.velocidadY = fuerzaSalto;
+                dinosaurio.saltando = true;
+            }
+        }
+
+        function reiniciar() {
+            terminado = false;
+            puntaje = 0;
+            velocidad = 6;
+            contadorObstaculo = 0;
+            obstaculos = [];
+
+            dinosaurio.y = sueloY - dinosaurio.alto;
+            dinosaurio.velocidadY = 0;
+            dinosaurio.saltando = false;
+
+            puntajeTexto.textContent = 'Puntaje: 0';
+        }
+
+        function crearObstaculo() {
+            const alto = 28 + Math.random() * 28;
+
+            obstaculos.push({
+                x: canvas.width,
+                y: sueloY - alto,
+                ancho: 20 + Math.random() * 18,
+                alto: alto,
+            });
+        }
+
+        function hayColision(a, b) {
+            return (
+                a.x < b.x + b.ancho &&
+                a.x + a.ancho > b.x &&
+                a.y < b.y + b.alto &&
+                a.y + a.alto > b.y
+            );
+        }
+
+        function actualizar() {
+            if (terminado) {
+                return;
+            }
+
+            dinosaurio.velocidadY += gravedad;
+            dinosaurio.y += dinosaurio.velocidadY;
+
+            if (dinosaurio.y >= sueloY - dinosaurio.alto) {
+                dinosaurio.y = sueloY - dinosaurio.alto;
+                dinosaurio.velocidadY = 0;
+                dinosaurio.saltando = false;
+            }
+
+            contadorObstaculo += 1;
+
+            if (contadorObstaculo > 75 + Math.random() * 55) {
+                crearObstaculo();
+                contadorObstaculo = 0;
+            }
+
+            obstaculos.forEach(function (obstaculo) {
+                obstaculo.x -= velocidad;
+
+                if (hayColision(dinosaurio, obstaculo)) {
+                    terminado = true;
+                }
+            });
+
+            obstaculos = obstaculos.filter(function (obstaculo) {
+                return obstaculo.x + obstaculo.ancho > 0;
+            });
+
+            puntaje += 1;
+            velocidad = Math.min(12, 6 + puntaje / 800);
+
+            puntajeTexto.textContent =
+                'Puntaje: ' + Math.floor(puntaje / 10);
+        }
+
+        function dibujarDinosaurio() {
+            context.fillStyle = '#222';
+
+            context.fillRect(
+                dinosaurio.x,
+                dinosaurio.y,
+                dinosaurio.ancho,
+                dinosaurio.alto
+            );
+
+            context.fillRect(
+                dinosaurio.x + 28,
+                dinosaurio.y - 10,
+                22,
+                18
+            );
+
+            context.clearRect(
+                dinosaurio.x + 42,
+                dinosaurio.y - 5,
+                4,
+                4
+            );
+        }
+
+        function dibujar() {
+            context.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            context.strokeStyle = '#555';
+            context.beginPath();
+            context.moveTo(0, sueloY);
+            context.lineTo(canvas.width, sueloY);
+            context.stroke();
+
+            dibujarDinosaurio();
+
+            context.fillStyle = '#555';
+
+            obstaculos.forEach(function (obstaculo) {
+                context.fillRect(
+                    obstaculo.x,
+                    obstaculo.y,
+                    obstaculo.ancho,
+                    obstaculo.alto
+                );
+            });
+
+            if (terminado) {
+                context.fillStyle = '#111';
+                context.font = '24px Arial';
+                context.textAlign = 'center';
+
+                context.fillText(
+                    'Fin del juego',
+                    canvas.width / 2,
+                    85
+                );
+
+                context.font = '16px Arial';
+
+                context.fillText(
+                    'Presione espacio o toque para reiniciar',
+                    canvas.width / 2,
+                    115
+                );
+            }
+        }
+
+        function ciclo() {
+            actualizar();
+            dibujar();
+
+            window.requestAnimationFrame(ciclo);
+        }
+
+        document.addEventListener(
+            'keydown',
+            function (event) {
+                if (event.code === 'Space') {
+                    event.preventDefault();
+                    saltar();
+                }
+            }
+        );
+
+        canvas.addEventListener('click', saltar);
+
+        canvas.addEventListener(
+            'touchstart',
+            function (event) {
+                event.preventDefault();
+                saltar();
+            },
+            { passive: false }
+        );
+
+        ciclo();
+    });
+</script>

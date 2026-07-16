@@ -1,0 +1,177 @@
+{{ block title }}
+Cuestionario final
+{{ endblock }}
+
+{{ block content }}
+
+<div class="campo-cuestionario">
+    {{ formfield 'edad' }}
+</div>
+
+<div class="campo-cuestionario">
+    {{ formfield 'carrera' }}
+</div>
+
+<div class="campo-cuestionario">
+    {{ formfield 'lugar_origen' }}
+</div>
+
+<div class="campo-cuestionario">
+
+    <label class="form-label" for="riesgo_general_slider">
+        Indique, en términos generales, en qué medida está dispuesto o no a asumir riesgos.
+        Utilice una escala del 1 al 10, donde 1 significa muy poco dispuesto a asumir riesgos
+        y 10 significa muy dispuesto a asumir riesgos.
+    </label>
+
+    <div
+        id="riesgo_general_valor"
+        class="valor-slider">
+        Seleccione un valor
+    </div>
+
+    <input
+        id="riesgo_general_slider"
+        class="form-range escala-slider"
+        type="range"
+        min="1"
+        max="10"
+        step="1"
+        value="5"
+        aria-label="Disposición general a asumir riesgos">
+
+    <input
+        id="riesgo_general_input"
+        type="hidden"
+        name="riesgo_general"
+        value="">
+
+    <div class="extremos-slider">
+        <span>1</span>
+        <span>10</span>
+    </div>
+
+</div>
+
+<div class="campo-cuestionario">
+
+    <label class="form-label" for="confianza_general_slider">
+        En términos generales, ¿diría que se puede confiar en la mayoría de la gente o que nunca está de más
+        ser precavido al tratar con los demás? 0 = Nunca está de más ser precavido;
+        10 = Se puede confiar en la mayoría de la gente.
+    </label>
+
+    <div
+        id="confianza_general_valor"
+        class="valor-slider">
+        Seleccione un valor
+    </div>
+
+    <input
+        id="confianza_general_slider"
+        class="form-range escala-slider"
+        type="range"
+        min="0"
+        max="10"
+        step="1"
+        value="5"
+        aria-label="Confianza general en la mayoría de la gente">
+
+    <input
+        id="confianza_general_input"
+        type="hidden"
+        name="confianza_general"
+        value="">
+
+    <div class="extremos-slider">
+        <span>0</span>
+        <span>10</span>
+    </div>
+
+</div>
+
+{{ next_button }}
+
+<style>
+    .campo-cuestionario {
+        margin-bottom: 30px;
+    }
+
+    .escala-slider {
+        width: 100%;
+        margin-top: 14px;
+        cursor: pointer;
+    }
+
+    .valor-slider {
+        display: inline-block;
+        min-width: 150px;
+        margin-top: 12px;
+        padding: 8px 14px;
+        border-radius: 20px;
+        background-color: #f1f5f9;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .extremos-slider {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        font-size: 14px;
+        color: #555;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        configurarSlider(
+            'riesgo_general_slider',
+            'riesgo_general_valor',
+            'riesgo_general_input'
+        );
+
+        configurarSlider(
+            'confianza_general_slider',
+            'confianza_general_valor',
+            'confianza_general_input'
+        );
+    });
+
+    function configurarSlider(sliderId, valorId, inputId) {
+        const slider = document.getElementById(sliderId);
+        const valor = document.getElementById(valorId);
+        const input = document.getElementById(inputId);
+
+        if (!slider || !valor || !input) {
+            return;
+        }
+
+        function registrarSeleccion() {
+            input.value = slider.value;
+            valor.textContent = slider.value;
+        }
+
+        slider.addEventListener(
+            'input',
+            registrarSeleccion
+        );
+
+        slider.addEventListener(
+            'change',
+            registrarSeleccion
+        );
+
+        slider.addEventListener(
+            'click',
+            registrarSeleccion
+        );
+
+        slider.addEventListener(
+            'touchstart',
+            registrarSeleccion
+        );
+    }
+</script>
+
+{{ endblock }}

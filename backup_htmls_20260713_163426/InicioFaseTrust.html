@@ -1,0 +1,19 @@
+{{ block title }}
+{{ if fase == 1 }}FASE 1{{ elif fase == 2 }}FASE 2{{ elif fase == 3 }}FASE 3{{ endif }}
+{{ endblock }}
+
+{{ block content }}
+{{ if fase == 2 }}
+<p>Inicio de la Fase 2</p>
+
+<p>En esta fase se realizará una actividad similar a la anterior, pero usted interactuará con un nuevo participante.</p>
+
+<p>A continuación, verá el rol que le ha sido asignado y las instrucciones correspondientes.</p>
+{{ endif }}
+
+{{ if fase == 3 }}
+<p>Ídem fase 2 con G3 como Participante A y G4 como Participante B.</p>
+{{ endif }}
+
+{{ next_button }}
+{{ endblock }}

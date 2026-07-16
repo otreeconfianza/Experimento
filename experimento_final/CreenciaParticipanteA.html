@@ -1,0 +1,22 @@
+{{ block title }}Predicciones{{ endblock }}
+
+{{ block content }}
+<p>
+    Si esta pregunta es seleccionada para el pago, podrá obtener una ganancia dependiendo de la
+    precisión de su predicción: Si el valor real se encuentra dentro del intervalo que usted eligió,
+    podrá recibir un monto de $6.000. De lo contrario, no obtendrá ganancias en esta instancia.
+</p>
+
+<p>
+    Como se explicó anteriormente, cada Participante B que reciba un monto de dinero por parte de un
+    Participante A, una vez duplicado el monto, deberá decidir si transferir o no una parte de éste al
+    Participante A.
+</p>
+
+<p>Puede consultar la descripción de la situación presionando el botón de ayuda.</p>
+
+{{ formfields }}
+
+{{ include_sibling 'AyudaTrust.html' }}
+{{ next_button }}
+{{ endblock }}

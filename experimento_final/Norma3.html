@@ -1,0 +1,17 @@
+{{ block title }}Pregunta 3{{ endblock }}
+
+{{ block content }}
+<p>
+    Suponga que el Participante A decide CONTINUAR, el monto se transfiere al Participante B y este lo
+    recibe duplicado.
+</p>
+
+<p>
+    Luego, el Participante B decide NO COMPARTIR, es decir, quedarse con todo el monto recibido.
+</p>
+
+{{ formfields }}
+
+{{ include_sibling 'AyudaTrust.html' }}
+{{ next_button }}
+{{ endblock }}

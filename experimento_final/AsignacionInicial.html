@@ -1,0 +1,19 @@
+{{ block title }}Asignación{{ endblock }}
+
+{{ block content }}
+{{ if es_g1 }}
+    <p>Usted ha sido asignado al grupo G1. Participará en 2 fases.</p>
+    <p>Aguarde a recibir las instrucciones correspondientes</p>
+{{ elif es_g2 }}
+    <p>Usted ha sido asignado al grupo G2. Participará en 3 fases.</p>
+    <p>Aguarde a recibir las instrucciones correspondientes</p>
+{{ elif es_g3 }}
+    <p>Usted ha sido asignado al grupo G3. Participará en 3 fases.</p>
+    <p>Aguarde a recibir las instrucciones correspondientes</p>
+{{ elif es_g4 }}
+    <p>Usted ha sido asignado al grupo G4. Participará en 2 fases.</p>
+    <p>Aguarde a recibir las instrucciones correspondientes</p>
+{{ endif }}
+
+{{ next_button }}
+{{ endblock }}

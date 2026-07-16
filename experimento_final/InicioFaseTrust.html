@@ -1,0 +1,33 @@
+{{ block title }}
+
+{{ if es_fase_2 }}
+Inicio de la Fase 2
+{{ elif es_fase_3 }}
+Inicio de la Fase 3
+{{ endif }}
+
+{{ endblock }}
+
+{{ block content }}
+
+{{ if ya_participo_antes }}
+
+<p>
+En esta fase se realizará una actividad similar a la anterior, pero usted interactuará con un nuevo participante.
+</p>
+
+<p>
+A continuación, verá el rol que le ha sido asignado y las instrucciones correspondientes.
+</p>
+
+{{ elif primera_participacion }}
+
+<p>
+A continuación, verá el rol que le ha sido asignado y las instrucciones correspondientes.
+</p>
+
+{{ endif }}
+
+{{ next_button }}
+
+{{ endblock }}
