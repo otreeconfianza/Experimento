@@ -9,7 +9,55 @@ Cuestionario final
 </div>
 
 <div class="campo-cuestionario">
-    {{ formfield 'carrera' }}
+    <label class="form-label" for="carrera_selector">Carrera</label>
+    <select
+        id="carrera_selector"
+        class="form-select"
+        required
+        aria-describedby="carrera_ayuda">
+        <option value="" selected disabled>Seleccione una carrera</option>
+
+        <optgroup label="Facultad de Ingeniería y Ciencias Agrarias">
+            <option value="Ingeniería Agronómica">Ingeniería Agronómica</option>
+            <option value="Ingeniería Ambiental">Ingeniería Ambiental</option>
+            <option value="Ingeniería Civil">Ingeniería Civil</option>
+            <option value="Ingeniería Electrónica">Ingeniería Electrónica</option>
+            <option value="Ingeniería en Alimentos">Ingeniería en Alimentos</option>
+            <option value="Ingeniería Informática">Ingeniería Informática</option>
+            <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+            <option value="Licenciatura en Biotecnología">Licenciatura en Biotecnología</option>
+            <option value="Licenciatura en Ciencia de Datos">Licenciatura en Ciencia de Datos</option>
+            <option value="Licenciatura en Tecnología de los Alimentos">Licenciatura en Tecnología de los Alimentos</option>
+            <option value="Tecnicatura Universitaria en Producción Agropecuaria">Tecnicatura Universitaria en Producción Agropecuaria</option>
+        </optgroup>
+
+        <optgroup label="Otras facultades">
+            <option value="Abogacía">Abogacía</option>
+            <option value="Administración de Empresas">Administración de Empresas</option>
+            <option value="Contador Público">Contador Público</option>
+            <option value="Economía">Economía</option>
+            <option value="Medicina">Medicina</option>
+            <option value="Psicología">Psicología</option>
+        </optgroup>
+
+        <option value="__otra__">Otra</option>
+    </select>
+    <div id="carrera_ayuda" class="form-text">
+        Si su carrera no aparece en el listado, seleccione “Otra”.
+    </div>
+
+    <div id="carrera_otra_contenedor" class="carrera-otra" hidden>
+        <label class="form-label" for="carrera_otra">Especifique su carrera</label>
+        <input
+            id="carrera_otra"
+            class="form-control"
+            type="text"
+            maxlength="255"
+            autocomplete="off">
+    </div>
+
+    <!-- Se conserva el campo original de oTree para no cambiar el modelo ni la exportación. -->
+    <input id="id_carrera" type="hidden" name="carrera" value="">
 </div>
 
 <div class="campo-cuestionario">
@@ -97,6 +145,10 @@ Cuestionario final
         margin-bottom: 30px;
     }
 
+    .carrera-otra {
+        margin-top: 16px;
+    }
+
     .escala-slider {
         width: 100%;
         margin-top: 14px;
@@ -125,6 +177,8 @@ Cuestionario final
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        configurarCarrera();
+
         configurarSlider(
             'riesgo_general_slider',
             'riesgo_general_valor',
@@ -137,6 +191,32 @@ Cuestionario final
             'confianza_general_input'
         );
     });
+
+    function configurarCarrera() {
+        const selector = document.getElementById('carrera_selector');
+        const otroContenedor = document.getElementById('carrera_otra_contenedor');
+        const otroInput = document.getElementById('carrera_otra');
+        const carreraInput = document.getElementById('id_carrera');
+
+        if (!selector || !otroContenedor || !otroInput || !carreraInput) {
+            return;
+        }
+
+        function actualizarCarrera() {
+            const esOtra = selector.value === '__otra__';
+            otroContenedor.hidden = !esOtra;
+            otroInput.required = esOtra;
+            carreraInput.value = esOtra ? otroInput.value.trim() : selector.value;
+
+            if (!esOtra) {
+                otroInput.value = '';
+            }
+        }
+
+        selector.addEventListener('change', actualizarCarrera);
+        otroInput.addEventListener('input', actualizarCarrera);
+        actualizarCarrera();
+    }
 
     function configurarSlider(sliderId, valorId, inputId) {
         const slider = document.getElementById(sliderId);
