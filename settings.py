@@ -15,6 +15,13 @@ SESSION_CONFIG_DEFAULTS = dict(
     doc="",
 )
 
+ROOMS = [
+    dict(
+        name='piloto',
+        display_name='Piloto',
+    ),
+]
+
 PARTICIPANT_FIELDS = []
 SESSION_FIELDS = []
 

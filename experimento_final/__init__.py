@@ -50,6 +50,7 @@ class C(BaseConstants):
 
     BELIEF_PAYMENT = cu(6000)
     NORM_PAYMENT_PER_MATCH = cu(3000)
+    VIATICOS = cu(3000)
 
     INTERVAL_CHOICES = [
         ['0_20', '0–20%'],
@@ -124,11 +125,8 @@ class Player(BasePlayer):
     )
     creencia_b_decision_a_f1 = models.StringField(
         choices=[
-            ['no_continuar', 'NO CONTINUAR y dividir el monto en partes iguales'],
-            [
-                'continuar',
-                'CONTINUAR y entregarle a usted (Participante B) el monto, el cual se duplicará y usted deberá decidir si compartir la mitad con A o quedarse con la totalidad.'
-            ],
+            ['no_continuar', 'NO CONTINUAR'],
+            ['continuar', 'CONTINUAR'],
         ],
         label='¿Qué decisión cree usted que tomará el participante A?',
         blank=True,
@@ -167,11 +165,8 @@ class Player(BasePlayer):
     )
     creencia_b_decision_a_f2 = models.StringField(
         choices=[
-            ['no_continuar', 'NO CONTINUAR y dividir el monto en partes iguales'],
-            [
-                'continuar',
-                'CONTINUAR y entregarle a usted (Participante B) el monto, el cual se duplicará y usted deberá decidir si compartir la mitad con A o quedarse con la totalidad.'
-            ],
+            ['no_continuar', 'NO CONTINUAR'],
+            ['continuar', 'CONTINUAR'],
         ],
         label='¿Qué decisión cree usted que tomará el participante A?',
         blank=True,
@@ -210,11 +205,8 @@ class Player(BasePlayer):
     )
     creencia_b_decision_a_f3 = models.StringField(
         choices=[
-            ['no_continuar', 'NO CONTINUAR y dividir el monto en partes iguales'],
-            [
-                'continuar',
-                'CONTINUAR y entregarle a usted (Participante B) el monto, el cual se duplicará y usted deberá decidir si compartir la mitad con A o quedarse con la totalidad.'
-            ],
+            ['no_continuar', 'NO CONTINUAR'],
+            ['continuar', 'CONTINUAR'],
         ],
         label='¿Qué decisión cree usted que tomará el participante A?',
         blank=True,
@@ -412,6 +404,7 @@ class Player(BasePlayer):
     # ------------------------------------------------------------
     actividad_pago_seleccionada = models.StringField(blank=True)
     pago_seleccionado_label = models.StringField(blank=True)
+    numero_pago = models.StringField(blank=True)
 
     def es_g1(self):
         return self.grupo_experimental == C.G1
@@ -843,7 +836,15 @@ def set_final_payoff(player: Player):
 
     player.actividad_pago_seleccionada = codigo
     player.pago_seleccionado_label = label
-    player.payoff = monto
+    player.payoff = C.VIATICOS + monto
+
+
+def assign_payment_numbers(subsession: Subsession):
+    players = subsession.get_players()
+    numbers = random.sample(range(100000, 1000000), len(players))
+
+    for player, number in zip(players, numbers):
+        player.numero_pago = str(number)
 
 
 # ----------------------------------------------------------------
@@ -1336,6 +1337,7 @@ class EsperaCalculoNormasYPagoFinal(WaitPage):
     @staticmethod
     def after_all_players_arrive(subsession: Subsession):
         compute_norms_payoffs(subsession)
+        assign_payment_numbers(subsession)
 
         for p in subsession.get_players():
             set_final_payoff(p)
@@ -1429,6 +1431,9 @@ class Resultados(Page):
             pago_dictador=player.pago_dictador or cu(0),
             pago_normas=player.pago_normas or cu(0),
 
+            viaticos=C.VIATICOS,
+            pago_actividad=(player.payoff or cu(0)) - C.VIATICOS,
+
             actividad_pago_seleccionada=(
                 player.actividad_pago_seleccionada
             ),
@@ -1436,6 +1441,8 @@ class Resultados(Page):
                 player.pago_seleccionado_label
             ),
             pago_final=player.payoff or cu(0),
+            numero_pago=player.numero_pago,
+            microsoft_forms_url='https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=l9b-Sf8B1kKlo25lunDYntXP2DRyIjhJgSaUU6CvWAtUQklCT1NWNzc1QTAyUjBUQzVTN0o3V1JTMy4u',
         )
     
 class Cierre(Page):
@@ -1463,7 +1470,6 @@ class Cierre(Page):
 page_sequence = [
     Consentimiento,
     ExplicacionGeneral,
-    PreguntasComprension,
     AsignacionInicial,
     EsperaInicioExperimento,
 

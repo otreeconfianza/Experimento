@@ -4,14 +4,34 @@ Resultados finales de la actividad
 
 {{ block content }}
 
-<p>
-Ha finalizado la actividad. Muchas gracias por su participación.
-</p>
-
 <hr>
 
 <p>
 <strong>Resumen de ganancias registradas:</strong>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Concepto</th>
+                <th>Ganancia registrada</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td>Viáticos</td>
+                <td>
+                    <strong>{{ viaticos }}</strong>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<p class="aclaracion-viaticos">
+    <em><small>Los viáticos son un pago base de $3000 que corresponde a todos los participantes.</small></em>
 </p>
 
 <div class="table-responsive">
@@ -123,13 +143,42 @@ Ha finalizado la actividad. Muchas gracias por su participación.
 {{ endif }}
 </p>
 
-<p class="pago-final">
-<strong>Pago final de la actividad: {{ pago_final }}</strong>
+<p>
+    <strong>Pago de la actividad seleccionada: {{ pago_actividad }}</strong>
 </p>
 
-<p>
-Por favor, permanezca en su lugar hasta recibir nuevas indicaciones.
+<p class="pago-final">
+<strong>Pago final (viáticos + actividad): {{ pago_final }}</strong>
 </p>
+
+<hr>
+
+<section class="registro-pago" aria-labelledby="registro-pago-titulo">
+    <h3 id="registro-pago-titulo">Registro para recibir su pago</h3>
+    <p>
+        Registre el siguiente número en Microsoft Forms junto con su correo electrónico y su nombre para poder recibir su pago.
+    </p>
+
+    <div class="numero-pago-contenedor">
+        <strong id="numeroPago">{{ numero_pago }}</strong>
+        <button
+            type="button"
+            class="boton-copiar"
+            id="copiarNumeroPago"
+            aria-label="Copiar número de pago"
+            title="Copiar número de pago">
+            <span aria-hidden="true">⧉</span>
+        </button>
+    </div>
+
+    <a
+        class="boton-forms"
+        href="{{ microsoft_forms_url }}"
+        target="_blank"
+        rel="noopener noreferrer">
+        Abrir Microsoft Forms
+    </a>
+</section>
 
 <style>
     .pago-final {
@@ -140,6 +189,89 @@ Por favor, permanezca en su lugar hasta recibir nuevas indicaciones.
         font-size: 18px;
         text-align: center;
     }
+
+    .registro-pago {
+        margin-top: 24px;
+        padding: 20px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .registro-pago h3 {
+        margin-top: 0;
+    }
+
+    .numero-pago-contenedor {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 0 16px;
+        padding: 8px 12px;
+        border: 1px solid #adb5bd;
+        border-radius: 6px;
+        font-size: 24px;
+        letter-spacing: 2px;
+    }
+
+    .boton-copiar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border: 1px solid #6c757d;
+        border-radius: 4px;
+        background: #fff;
+        color: #212529;
+        cursor: pointer;
+        font-size: 22px;
+        letter-spacing: 0;
+    }
+
+    .boton-copiar:hover,
+    .boton-copiar:focus {
+        background: #f1f3f5;
+    }
+
+    .boton-forms {
+        display: block;
+        width: fit-content;
+        margin: 0 auto;
+        padding: 9px 16px;
+        border-radius: 4px;
+        background: #2c3e50;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .boton-forms:hover,
+    .boton-forms:focus {
+        background: #1f2d3a;
+        color: #fff;
+    }
 </style>
+
+<script>
+    (function () {
+        const numero = document.getElementById('numeroPago');
+        const botonCopiar = document.getElementById('copiarNumeroPago');
+
+        if (!numero || !botonCopiar) {
+            return;
+        }
+
+        botonCopiar.addEventListener('click', async function () {
+            try {
+                await navigator.clipboard.writeText(numero.textContent.trim());
+                botonCopiar.title = 'Número copiado';
+                botonCopiar.setAttribute('aria-label', 'Número copiado');
+            } catch (error) {
+                botonCopiar.title = 'No se pudo copiar automáticamente';
+            }
+        });
+    })();
+</script>
 
 {{ endblock }}
