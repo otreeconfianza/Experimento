@@ -1,0 +1,16 @@
+{{ block title }}Predicción 2{{ endblock }}
+
+{{ block content }}
+<p>
+  Estime qué porcentaje de los demás participantes A elegirá CONTINUAR.
+</p>
+
+{{ formfields }}
+
+<p>
+    <em>Si el valor real se encuentra dentro del intervalo elegido, podrá recibir una ganancia de $6.000; de lo contrario, no podrá obtener una ganancia por esa estimación.</em>
+</p>
+
+{{ include_sibling 'AyudaTrust.html' }}
+{{ next_button }}
+{{ endblock }}

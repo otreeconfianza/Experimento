@@ -123,6 +123,11 @@ class Player(BasePlayer):
         label='¿Qué porcentaje de sujetos B en su sesión cree usted que elegirá COMPARTIR?',
         blank=True,
     )
+    creencia_a_porcentaje_a_continua_f1 = models.StringField(
+        choices=C.INTERVAL_CHOICES,
+        label='Estime qué porcentaje de los demás participantes A elegirá CONTINUAR.',
+        blank=True,
+    )
     creencia_b_decision_a_f1 = models.StringField(
         choices=[
             ['no_continuar', 'NO CONTINUAR'],
@@ -134,6 +139,11 @@ class Player(BasePlayer):
     creencia_b_porcentaje_a_continua_f1 = models.StringField(
         choices=C.INTERVAL_CHOICES,
         label='Estime qué porcentaje de participantes A elegirá CONTINUAR.',
+        blank=True,
+    )
+    creencia_b_porcentaje_b_comparte_f1 = models.StringField(
+        choices=C.INTERVAL_CHOICES,
+        label='¿Qué porcentaje de participantes B cree que elegirá COMPARTIR?',
         blank=True,
     )
     decision_a_f1 = models.StringField(
@@ -163,6 +173,11 @@ class Player(BasePlayer):
         label='¿Qué porcentaje de sujetos B en su sesión cree usted que elegirá COMPARTIR?',
         blank=True,
     )
+    creencia_a_porcentaje_a_continua_f2 = models.StringField(
+        choices=C.INTERVAL_CHOICES,
+        label='Estime qué porcentaje de los demás participantes A elegirá CONTINUAR.',
+        blank=True,
+    )
     creencia_b_decision_a_f2 = models.StringField(
         choices=[
             ['no_continuar', 'NO CONTINUAR'],
@@ -174,6 +189,11 @@ class Player(BasePlayer):
     creencia_b_porcentaje_a_continua_f2 = models.StringField(
         choices=C.INTERVAL_CHOICES,
         label='Estime qué porcentaje de participantes A elegirá CONTINUAR.',
+        blank=True,
+    )
+    creencia_b_porcentaje_b_comparte_f2 = models.StringField(
+        choices=C.INTERVAL_CHOICES,
+        label='¿Qué porcentaje de participantes B cree que elegirá COMPARTIR?',
         blank=True,
     )
     decision_a_f2 = models.StringField(
@@ -203,6 +223,11 @@ class Player(BasePlayer):
         label='¿Qué porcentaje de sujetos B en su sesión cree usted que elegirá COMPARTIR?',
         blank=True,
     )
+    creencia_a_porcentaje_a_continua_f3 = models.StringField(
+        choices=C.INTERVAL_CHOICES,
+        label='Estime qué porcentaje de los demás participantes A elegirá CONTINUAR.',
+        blank=True,
+    )
     creencia_b_decision_a_f3 = models.StringField(
         choices=[
             ['no_continuar', 'NO CONTINUAR'],
@@ -214,6 +239,11 @@ class Player(BasePlayer):
     creencia_b_porcentaje_a_continua_f3 = models.StringField(
         choices=C.INTERVAL_CHOICES,
         label='Estime qué porcentaje de participantes A elegirá CONTINUAR.',
+        blank=True,
+    )
+    creencia_b_porcentaje_b_comparte_f3 = models.StringField(
+        choices=C.INTERVAL_CHOICES,
+        label='¿Qué porcentaje de participantes B cree que elegirá COMPARTIR?',
         blank=True,
     )
     decision_a_f3 = models.StringField(
@@ -460,8 +490,10 @@ class Player(BasePlayer):
         fase = self.round_number
         return dict(
             creencia_a=f'creencia_a_b_comparte_f{fase}',
+            creencia_a_porcentaje=f'creencia_a_porcentaje_a_continua_f{fase}',
             creencia_b_decision=f'creencia_b_decision_a_f{fase}',
             creencia_b_porcentaje=f'creencia_b_porcentaje_a_continua_f{fase}',
+            creencia_b_porcentaje_b_comparte=f'creencia_b_porcentaje_b_comparte_f{fase}',
             decision_a=f'decision_a_f{fase}',
             decision_b=f'decision_b_f{fase}',
             pago_juego=f'pago_juego_confianza_f{fase}',
@@ -1016,6 +1048,24 @@ class CreenciaParticipanteA(Page):
             return 'Debe seleccionar una opción para continuar.'
 
 
+class CreenciaPorcentajeAContina(Page):
+    form_model = 'player'
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number in [1, 2, 3] and player.es_participante_a()
+
+    @staticmethod
+    def get_form_fields(player: Player):
+        return [player.trust_fields()['creencia_a_porcentaje']]
+
+    @staticmethod
+    def error_message(player, values):
+        field = player.trust_fields()['creencia_a_porcentaje']
+        if not values.get(field):
+            return 'Debe seleccionar una opción para continuar.'
+
+
 class CreenciaBDecisionA(Page):
     form_model = 'player'
 
@@ -1048,6 +1098,24 @@ class CreenciaBPorcentajeA(Page):
     @staticmethod
     def error_message(player, values):
         field = player.trust_fields()['creencia_b_porcentaje']
+        if not values.get(field):
+            return 'Debe seleccionar una opción para continuar.'
+
+
+class CreenciaBPorcentajeBComparte(Page):
+    form_model = 'player'
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number in [1, 2, 3] and player.es_participante_b()
+
+    @staticmethod
+    def get_form_fields(player: Player):
+        return [player.trust_fields()['creencia_b_porcentaje_b_comparte']]
+
+    @staticmethod
+    def error_message(player, values):
+        field = player.trust_fields()['creencia_b_porcentaje_b_comparte']
         if not values.get(field):
             return 'Debe seleccionar una opción para continuar.'
 
@@ -1477,11 +1545,13 @@ page_sequence = [
     InstruccionesTrust,
     InstruccionesParticipanteA,
     CreenciaParticipanteA,
+    CreenciaPorcentajeAContina,
     DecisionParticipanteA,
 
     InstruccionesParticipanteB,
     CreenciaBDecisionA,
     CreenciaBPorcentajeA,
+    CreenciaBPorcentajeBComparte,
 
     WaitForADecision,
     DecisionParticipanteB,
