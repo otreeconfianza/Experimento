@@ -120,12 +120,12 @@ class Player(BasePlayer):
     # ------------------------------------------------------------
     creencia_a_b_comparte_f1 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='¿Qué porcentaje de sujetos B en su sesión cree usted que elegirá COMPARTIR?',
+        label='',
         blank=True,
     )
     creencia_a_porcentaje_a_continua_f1 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='Estime qué porcentaje de los demás participantes A elegirá CONTINUAR.',
+        label='',
         blank=True,
     )
     creencia_b_decision_a_f1 = models.StringField(
@@ -133,17 +133,17 @@ class Player(BasePlayer):
             ['no_continuar', 'NO CONTINUAR'],
             ['continuar', 'CONTINUAR'],
         ],
-        label='¿Qué decisión cree usted que tomará el participante A?',
+        label='',
         blank=True,
     )
     creencia_b_porcentaje_a_continua_f1 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='Estime qué porcentaje de participantes A elegirá CONTINUAR.',
+        label='',
         blank=True,
     )
     creencia_b_porcentaje_b_comparte_f1 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='¿Qué porcentaje de participantes B cree que elegirá COMPARTIR?',
+        label='',
         blank=True,
     )
     decision_a_f1 = models.StringField(
@@ -170,12 +170,12 @@ class Player(BasePlayer):
     # ------------------------------------------------------------
     creencia_a_b_comparte_f2 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='¿Qué porcentaje de sujetos B en su sesión cree usted que elegirá COMPARTIR?',
+        label='',
         blank=True,
     )
     creencia_a_porcentaje_a_continua_f2 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='Estime qué porcentaje de los demás participantes A elegirá CONTINUAR.',
+        label='',
         blank=True,
     )
     creencia_b_decision_a_f2 = models.StringField(
@@ -183,17 +183,17 @@ class Player(BasePlayer):
             ['no_continuar', 'NO CONTINUAR'],
             ['continuar', 'CONTINUAR'],
         ],
-        label='¿Qué decisión cree usted que tomará el participante A?',
+        label='',
         blank=True,
     )
     creencia_b_porcentaje_a_continua_f2 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='Estime qué porcentaje de participantes A elegirá CONTINUAR.',
+        label='',
         blank=True,
     )
     creencia_b_porcentaje_b_comparte_f2 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='¿Qué porcentaje de participantes B cree que elegirá COMPARTIR?',
+        label='',
         blank=True,
     )
     decision_a_f2 = models.StringField(
@@ -220,12 +220,12 @@ class Player(BasePlayer):
     # ------------------------------------------------------------
     creencia_a_b_comparte_f3 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='¿Qué porcentaje de sujetos B en su sesión cree usted que elegirá COMPARTIR?',
+        label='',
         blank=True,
     )
     creencia_a_porcentaje_a_continua_f3 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='Estime qué porcentaje de los demás participantes A elegirá CONTINUAR.',
+        label='',
         blank=True,
     )
     creencia_b_decision_a_f3 = models.StringField(
@@ -233,17 +233,17 @@ class Player(BasePlayer):
             ['no_continuar', 'NO CONTINUAR'],
             ['continuar', 'CONTINUAR'],
         ],
-        label='¿Qué decisión cree usted que tomará el participante A?',
+        label='',
         blank=True,
     )
     creencia_b_porcentaje_a_continua_f3 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='Estime qué porcentaje de participantes A elegirá CONTINUAR.',
+        label='',
         blank=True,
     )
     creencia_b_porcentaje_b_comparte_f3 = models.StringField(
         choices=C.INTERVAL_CHOICES,
-        label='¿Qué porcentaje de participantes B cree que elegirá COMPARTIR?',
+        label='',
         blank=True,
     )
     decision_a_f3 = models.StringField(
