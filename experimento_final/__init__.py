@@ -755,6 +755,10 @@ def compute_belief_payoffs_trust(subsession: Subsession):
                 p.field_maybe_none(fields['creencia_a']),
                 realized_b_share_code,
             )
+            pago += score_interval_exact(
+                p.field_maybe_none(fields['creencia_a_porcentaje']),
+                realized_a_continue_code,
+            )
 
         elif p.rol_en_ronda == C.ROLE_B:
             a = p.group.a_player()
@@ -767,6 +771,10 @@ def compute_belief_payoffs_trust(subsession: Subsession):
             pago += score_interval_exact(
                 p.field_maybe_none(fields['creencia_b_porcentaje']),
                 realized_a_continue_code,
+            )
+            pago += score_interval_exact(
+                p.field_maybe_none(fields['creencia_b_porcentaje_b_comparte']),
+                a.field_maybe_none(fields['creencia_a']) if a else None,
             )
 
         setattr(p, fields['pago_creencias'], pago)

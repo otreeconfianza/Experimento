@@ -1,0 +1,153 @@
+<section class="juego-pacman" aria-label="Comepuntos">
+  <h3>Juego 2</h3>
+  <p>Mientras espera sus instrucciones puede jugar al siguiente juego como entretenimiento. El mismo no afectará sus ganancias.</p>
+  <p>Presione las flechas del teclado o los botones de dirección para moverse.</p>
+  <canvas id="pacmanCanvas" width="456" height="408" tabindex="0" aria-label="Laberinto. Use las flechas o WASD después de pulsar Jugar."></canvas>
+  <p id="pacmanEstado" role="status">Pulse Jugar para comenzar.</p>
+  <button type="button" id="pacmanIniciar">Jugar</button>
+  <div class="pacman-controles" aria-label="Controles de dirección">
+    <button type="button" data-pacman-dir="up" aria-label="Arriba">▲</button>
+    <div><button type="button" data-pacman-dir="left" aria-label="Izquierda">◀</button>
+    <button type="button" data-pacman-dir="down" aria-label="Abajo">▼</button>
+    <button type="button" data-pacman-dir="right" aria-label="Derecha">▶</button></div>
+  </div>
+</section>
+<style>
+.juego-pacman{max-width:700px;margin:32px auto;padding:24px 0 0;border-top:1px solid #ccc;background:#fff;color:#222;font-family:inherit;text-align:left}
+.juego-pacman h3{color:#222;font-size:20px;font-weight:600;margin:0 0 12px}.juego-pacman small{display:block;color:#555;font-size:13px;font-weight:normal;margin-top:6px}
+#pacmanCanvas{display:block;width:100%;max-width:456px;height:auto;margin:16px auto;background:#fff;border:1px solid #aaa;border-radius:2px;touch-action:manipulation}
+#pacmanCanvas:focus-visible{outline:2px solid #222;outline-offset:3px}
+.juego-pacman button{min-width:48px;min-height:44px;border:1px solid #777;border-radius:3px;background:#fff;color:#222;margin:3px;cursor:pointer;font:inherit}
+.juego-pacman button:hover{background:#eee}.juego-pacman button:focus-visible{outline:2px solid #222;outline-offset:2px}
+#pacmanIniciar{padding:8px 24px}.pacman-controles{text-align:center;margin:10px 0}.pacman-ayuda{font-size:13px;color:#555;line-height:1.6}#pacmanEstado{margin:12px 0;min-height:24px}
+</style>
+<script>
+(function () {
+  function iniciarComepuntos() {
+    const canvas = document.getElementById('pacmanCanvas');
+    if (!canvas || canvas.dataset.ready) return;
+    canvas.dataset.ready = 'true';
+    const ctx = canvas.getContext('2d'), root = canvas.closest('section');
+    const estado = document.getElementById('pacmanEstado'), boton = document.getElementById('pacmanIniciar');
+    const mapaBase = [
+      '###################',
+      '#o...............o#',
+      '#.###.###.###.###.#',
+      '#.###.###.###.###.#',
+      '#.................#',
+      '#.###.#.###.#.###.#',
+      '#.....#.....#.....#',
+      '###.#.###.###.#.###',
+      '#...#.........#...#',
+      '#.#.###.#.#.###.#.#',
+      '#.#.....#.#.....#.#',
+      '#.###.###.###.###.#',
+      '#.................#',
+      '#.###.###.###.###.#',
+      '#.###.###.###.###.#',
+      '#o....... .......o#',
+      '###################'
+    ];
+    const dirs = {left:{x:-1,y:0},right:{x:1,y:0},up:{x:0,y:-1},down:{x:0,y:1}};
+    const PLAYER_MS = 200, GHOST_MS = 383, CELL = 24;
+    let mapa, jugador, enemigos, pedido, puntos, vidas, proteccion, ventaja;
+    let jugando = false, final = false, ganado = false, reloj = null, pj = 0, pe = 0, anim = 0;
+    function posiciones() {
+      jugador = {x:9,y:15,dir:dirs.left}; pedido = dirs.left;
+      enemigos = [{x:1,y:1,dir:dirs.right,color:'#222222'}, {x:17,y:1,dir:dirs.left,color:'#555555'}];
+      pj=0; pe=0; ventaja=3000; proteccion=0;
+    }
+    function reiniciar() {
+      mapa = mapaBase.map(f=>f.split('')); puntos=0; vidas=3; final=false; ganado=false;
+      posiciones(); reloj=null;
+    }
+    function libre(x,y) { return y>=0 && y<mapa.length && x>=0 && x<19 && mapa[y][x]!=='#'; }
+    function mover(p,d) {
+      if (!libre(p.x+d.x,p.y+d.y)) return false;
+      p.x+=d.x; p.y+=d.y; p.dir=d; return true;
+    }
+    function comprobar() {
+      if (!proteccion && enemigos.some(e=>e.x===jugador.x && e.y===jugador.y)) {
+        vidas--;
+        if (!vidas) { final=true; jugando=false; }
+        else posiciones();
+      }
+      if (!mapa.some(f=>f.includes('.') || f.includes('o'))) {final=true; ganado=true; jugando=false;}
+    }
+    function pasoJugador() {
+      mover(jugador,pedido) || mover(jugador,jugador.dir);
+      const v=mapa[jugador.y][jugador.x];
+      if (v==='.' || v==='o') {
+        puntos+=v==='o'?50:10; mapa[jugador.y][jugador.x]=' ';
+        if (v==='o') proteccion=6000;
+      }
+      comprobar();
+    }
+    function pasoEnemigo(e) {
+      let opciones=Object.values(dirs).filter(d=>libre(e.x+d.x,e.y+d.y));
+      const adelante=opciones.filter(d=>d.x!==-e.dir.x || d.y!==-e.dir.y);
+      if (adelante.length) opciones=adelante;
+      opciones.sort((a,b)=>{
+        const da=Math.abs(e.x+a.x-jugador.x)+Math.abs(e.y+a.y-jugador.y);
+        const db=Math.abs(e.x+b.x-jugador.x)+Math.abs(e.y+b.y-jugador.y);
+        return proteccion?db-da:da-db;
+      });
+      if (opciones.length) mover(e,Math.random()<0.5?opciones[0]:opciones[Math.floor(Math.random()*opciones.length)]);
+    }
+    function texto() {
+      const s=final?(ganado?'¡Laberinto completado!':'Fin del juego'):!jugando?'En pausa':proteccion?'Protección activa':ventaja>0?'Tiene unos segundos de ventaja':'Modo tranquilo';
+      estado.textContent='Puntos: '+puntos+' · Vidas: '+vidas;
+      boton.textContent=final?'Volver a jugar':jugando?'Pausar':'Jugar';
+    }
+    function dibujar() {
+      ctx.fillStyle='#ffffff';ctx.fillRect(0,0,456,408);
+      mapa.forEach((f,y)=>f.forEach((v,x)=>{
+        if(v==='#'){ctx.fillStyle='#333333';ctx.fillRect(x*CELL+2,y*CELL+2,20,20);ctx.fillStyle='#777777';ctx.fillRect(x*CELL+4,y*CELL+3,16,2);}
+        if(v==='.'||v==='o'){ctx.fillStyle='#333333';ctx.beginPath();ctx.arc(x*CELL+12,y*CELL+12,v==='o'?5:2,0,Math.PI*2);ctx.fill();}
+      }));
+      const a=Math.atan2(jugador.dir.y,jugador.dir.x), boca=.18+Math.abs(Math.sin(anim))*.35;
+      ctx.fillStyle=proteccion?'#666666':'#111111';ctx.beginPath();ctx.moveTo(jugador.x*CELL+12,jugador.y*CELL+12);
+      ctx.arc(jugador.x*CELL+12,jugador.y*CELL+12,10,a+boca,a+2*Math.PI-boca);ctx.closePath();ctx.fill();
+      enemigos.forEach(e=>{
+        const x=e.x*CELL+12,y=e.y*CELL+12;ctx.fillStyle=proteccion?'#aaaaaa':e.color;
+        ctx.beginPath();ctx.arc(x,y-1,9,Math.PI,0);ctx.lineTo(x+9,y+9);ctx.lineTo(x+4,y+6);ctx.lineTo(x,y+9);ctx.lineTo(x-4,y+6);ctx.lineTo(x-9,y+9);ctx.closePath();ctx.fill();
+        ctx.fillStyle='#fff';ctx.fillRect(x-5,y-4,4,5);ctx.fillRect(x+2,y-4,4,5);
+      });
+      if(!jugando){ctx.fillStyle='rgba(255,255,255,.95)';ctx.fillRect(25,168,406,72);ctx.textAlign='center';ctx.fillStyle='#222';ctx.font='bold 22px system-ui';ctx.fillText(final?(ganado?'Completado':'Fin del juego'):'Pausa',228,197);}
+    }
+    function pausar(){jugando=false;reloj=null;texto();}
+    boton.addEventListener('click',()=>{
+      if(final)reiniciar();
+      jugando=!jugando;reloj=null;
+      if(jugando)canvas.focus({preventScroll:true});texto();
+    });
+    canvas.addEventListener('keydown',e=>{
+      const k={ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right',ArrowUp:'up',w:'up',ArrowDown:'down',s:'down'};
+      const d=k[e.key]||k[e.key.toLowerCase()];if(d){e.preventDefault();pedido=dirs[d];}
+    });
+    root.querySelectorAll('[data-pacman-dir]').forEach(b=>b.addEventListener('click',()=>{
+      pedido=dirs[b.dataset.pacmanDir];canvas.focus({preventScroll:true});
+    }));
+    // Pausar ante interacciones externas, no ante pérdidas transitorias de foco.
+    document.addEventListener('pointerdown',e=>{if(!root.contains(e.target))pausar();});
+    document.addEventListener('focusin',e=>{if(!root.contains(e.target))pausar();});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)pausar();});
+    let frame;
+    function ciclo(t){
+      const dt=reloj===null?0:Math.min(50,t-reloj);reloj=t;
+      if(jugando&&!document.hidden){
+        proteccion=Math.max(0,proteccion-dt);anim+=dt*.009;pj+=dt;
+        if(pj>=PLAYER_MS){pj-=PLAYER_MS;pasoJugador();}
+        if(ventaja>0)ventaja-=dt;
+        else if(jugando){pe+=dt;if(pe>=GHOST_MS){pe-=GHOST_MS;enemigos.forEach(pasoEnemigo);comprobar();}}
+        texto();
+      }
+      dibujar();frame=requestAnimationFrame(ciclo);
+    }
+    window.addEventListener('pagehide',()=>{cancelAnimationFrame(frame);pausar();});
+    window.addEventListener('pageshow',e=>{if(e.persisted){reloj=null;frame=requestAnimationFrame(ciclo);}});
+    reiniciar();texto();frame=requestAnimationFrame(ciclo);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciarComepuntos);else iniciarComepuntos();
+})();
+</script>

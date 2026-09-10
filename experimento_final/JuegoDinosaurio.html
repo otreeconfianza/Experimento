@@ -1,262 +1,125 @@
-<div class="juego-dinosaurio">
-    <p><strong>Juego</strong></p>
-    <p class="juego-subtitulo">Mientras espera sus instrucciones puede jugar al siguiente juego como entretenimiento. El mismo no afectará sus ganancias.</p>
-    <p>Presione la barra espaciadora o toque el juego para saltar.</p>
-
-    <canvas
-        id="dinoCanvas"
-        width="700"
-        height="220"
-        aria-label="Juego del dinosaurio">
-    </canvas>
-
-    <p id="dinoPuntaje">Puntaje: 0</p>
-</div>
-
+<section class="juego-dinosaurio" aria-label="Dinosaurio del desierto">
+  <h3>Juego 1</h3>
+  <p>Mientras espera sus instrucciones puede jugar al siguiente juego como entretenimiento. El mismo no afectará sus ganancias.</p>
+  <p class="dino-descripcion">Presione la barra espaciadora o toque el juego para saltar.</p>
+  <div class="dino-marcador"><span id="dinoPuntaje">Distancia: 0 m</span><span id="dinoRecord">Mejor: 0 m</span></div>
+  <canvas id="dinoCanvas" width="800" height="300" tabindex="0" aria-label="Dinosaurio del desierto. Pulse Jugar y use espacio para saltar; también puede tocar el paisaje."></canvas>
+  <div class="dino-acciones"><button type="button" id="dinoInicio">Jugar</button><button type="button" id="dinoSalto">Saltar ↑</button></div>
+  <p id="dinoEstado" class="dino-lector" role="status">Listo para jugar.</p>
+</section>
 <style>
-    .juego-dinosaurio {
-        margin-top: 24px;
-        text-align: center;
-    }
-
-    .juego-subtitulo {
-        margin: 4px auto 10px;
-        max-width: 700px;
-    }
-
-    #dinoCanvas {
-        width: 100%;
-        max-width: 700px;
-        height: 220px;
-        border: 1px solid #777;
-        border-radius: 8px;
-        background: #ffffff;
-        touch-action: manipulation;
-    }
-
-    #dinoPuntaje {
-        margin-top: 10px;
-        font-weight: bold;
-    }
+.juego-dinosaurio{max-width:700px;margin:28px auto;padding:0;background:#fff;color:#222;font-family:inherit}
+.juego-dinosaurio h3{font-size:20px;font-weight:600;margin:0 0 12px;color:#222}
+.dino-descripcion{font-size:14px;margin:8px 0 18px;color:#444}.dino-marcador{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:10px;font-variant-numeric:tabular-nums}
+#dinoCanvas{display:block;width:100%;height:auto;border:1px solid #aaa;border-radius:2px;background:#fff;touch-action:manipulation}#dinoCanvas:focus-visible{outline:2px solid #222;outline-offset:3px}
+.dino-acciones{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}.dino-acciones button{min-height:44px;border-radius:3px;padding:10px 20px;border:1px solid #777;background:#fff;color:#222;cursor:pointer;font:inherit}.dino-acciones button:hover{background:#eee}.dino-acciones button:focus-visible{outline:2px solid #222;outline-offset:2px}.dino-acciones span{font-size:12px;color:#555;margin-left:auto}.dino-nota{font-size:13px;line-height:1.6;color:#555;margin:15px 0 0}.dino-lector{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(max-width:500px){.dino-acciones span{width:100%;margin-left:0}}
 </style>
-
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const canvas = document.getElementById('dinoCanvas');
-
-        if (!canvas) {
-            return;
+(function () {
+  function iniciarDinosaurio() {
+    const canvas=document.getElementById('dinoCanvas');
+    if(!canvas||canvas.dataset.ready)return;
+    canvas.dataset.ready='true';
+    const ctx=canvas.getContext('2d'),root=canvas.closest('section');
+    const boton=document.getElementById('dinoInicio'),salto=document.getElementById('dinoSalto');
+    const marcador=document.getElementById('dinoPuntaje'),record=document.getElementById('dinoRecord'),estado=document.getElementById('dinoEstado');
+    const GROUND=242, GRAVITY=1900, JUMP=-650, STEP=1/120;
+    let modo='listo',distancia=0,mejor=0,velocidad=210,tiempo=0,obstaculos=[],siguiente=1.4;
+    let altura=0,vy=0,bufferSalto=0,reloj=null,acumulado=0,frame;
+    const sprite=[
+      '        XXXXXXXX ',
+      '       XXXXXXXXXX',
+      '       XXXXXXXXXX',
+      '       XXXXXXXXXX',
+      '       XXXXX     ',
+      '       XXXXXXXX  ',
+      'X     XXXXX      ',
+      'XX   XXXXXXXX    ',
+      'XXX XXXXXXXXX X  ',
+      ' XXXXXXXXXXX     ',
+      '  XXXXXXXXXX     ',
+      '   XXXXXXXX      '
+    ];
+    function reiniciar(){distancia=0;velocidad=210;tiempo=0;obstaculos=[];siguiente=1.4;altura=0;vy=0;bufferSalto=0;acumulado=0;reloj=null;}
+    function comunicar(){
+      boton.textContent=modo==='jugando'?'Pausar':modo==='fin'?'Volver a jugar':modo==='pausa'?'Continuar':'Jugar';
+      estado.textContent=modo==='fin'?'Fin del juego. Recorrió '+Math.floor(distancia/10)+' metros.':modo==='jugando'?'En juego.':modo==='pausa'?'En pausa.':'Listo para jugar.';
+    }
+    function empezar(){if(modo==='fin'||modo==='listo')reiniciar();modo='jugando';reloj=null;canvas.focus({preventScroll:true});comunicar();}
+    function pausar(){if(modo==='jugando'){modo='pausa';bufferSalto=0;reloj=null;comunicar();}}
+    function saltar(){if(modo!=='jugando')empezar();bufferSalto=.13;}
+    boton.addEventListener('click',()=>{if(modo==='jugando')pausar();else empezar();});
+    salto.addEventListener('click',()=>{canvas.focus({preventScroll:true});saltar();});
+    canvas.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();canvas.focus({preventScroll:true});saltar();});
+    canvas.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(!e.repeat)saltar();}});
+    // Pausar ante interacciones externas, no ante pérdidas transitorias de foco.
+    document.addEventListener('pointerdown',e=>{if(!root.contains(e.target))pausar();});
+    document.addEventListener('focusin',e=>{if(!root.contains(e.target))pausar();});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden)pausar();});
+    function actualizar(dt){
+      tiempo+=dt;velocidad=Math.min(330,210+tiempo*1.1);distancia+=velocidad*dt;
+      if(bufferSalto>0&&altura===0){vy=JUMP;bufferSalto=0;}
+      bufferSalto=Math.max(0,bufferSalto-dt);
+      if(altura>0||vy<0){vy+=GRAVITY*dt;altura-=vy*dt;if(altura<=0){altura=0;vy=0;}}
+      siguiente-=dt;
+      if(siguiente<=0){obstaculos.push({x:830,w:22+Math.random()*12,h:32+Math.random()*17});siguiente=1.7+Math.random()*.75;}
+      for(const o of obstaculos){
+        o.x-=velocidad*dt;
+        // Forgiving hitboxes exclude the tail, snout and cactus branches.
+        if(119<o.x+o.w-3&&145>o.x+3&&GROUND-altura-43<GROUND&&GROUND-altura-4>GROUND-o.h+5){
+          modo='fin';mejor=Math.max(mejor,Math.floor(distancia/10));comunicar();break;
         }
+      }
+      obstaculos=obstaculos.filter(o=>o.x+o.w>0);
+    }
+    function nube(x,y,s){ctx.fillStyle='#eeeeee';ctx.beginPath();ctx.ellipse(x,y,29*s,8*s,0,0,Math.PI*2);ctx.ellipse(x-8*s,y-6*s,13*s,11*s,0,0,Math.PI*2);ctx.ellipse(x+9*s,y-9*s,15*s,14*s,0,0,Math.PI*2);ctx.fill();}
+    function montanas(color,base,alto,ancho,paralaje){
+      ctx.fillStyle=color;const offset=(distancia*paralaje)%ancho;
+      for(let x=-ancho-offset;x<800;x+=ancho){ctx.beginPath();ctx.moveTo(x,base);ctx.quadraticCurveTo(x+ancho*.45,base-alto,x+ancho,base);ctx.lineTo(x+ancho,GROUND);ctx.lineTo(x,GROUND);ctx.fill();}
+    }
+    function cactus(o){
+      const x=o.x,y=GROUND-o.h,w=o.w;ctx.fillStyle='#333333';
+      ctx.fillRect(x+w*.38,y,w*.32,o.h);ctx.beginPath();ctx.arc(x+w*.54,y,w*.16,Math.PI,0);ctx.fill();
+      ctx.fillRect(x,y+o.h*.34,w*.18,o.h*.37);ctx.fillRect(x,y+o.h*.58,w*.45,6);
+      ctx.fillRect(x+w*.82,y+o.h*.16,w*.18,o.h*.35);ctx.fillRect(x+w*.58,y+o.h*.42,w*.42,6);
+      ctx.fillStyle='#999999';ctx.fillRect(x+w*.44,y+5,2,o.h-8);
+    }
+    function dinosaurio(){
+      const x=92,y=GROUND-altura-62,bob=altura===0&&modo==='jugando'?Math.sin(tiempo*18)*1.1:0;
+      ctx.fillStyle='#222222';sprite.forEach((fila,j)=>{for(let i=0;i<fila.length;i++)if(fila[i]==='X')ctx.fillRect(x+i*4,y+j*4+bob,4,4);});
+      ctx.fillStyle='#888888';ctx.fillRect(x+28,y+28+bob,4,12);ctx.fillRect(x+24,y+36+bob,4,8);
+      ctx.fillStyle='#ffffff';ctx.fillRect(x+52,y+8+bob,4,4);ctx.fillStyle=modo==='fin'?'#777777':'#111111';ctx.fillRect(x+54,y+8+bob,2,3);
+      const fase=modo==='jugando'&&altura===0?Math.sin(tiempo*19):0;
+      ctx.fillStyle='#222222';ctx.fillRect(x+20,y+46+bob,7,12-Math.max(0,fase)*6);ctx.fillRect(x+20,y+55+bob-Math.max(0,fase)*6,13,5);
+      ctx.fillRect(x+36,y+46+bob,7,12-Math.max(0,-fase)*6);ctx.fillRect(x+36,y+55+bob-Math.max(0,-fase)*6,13,5);
+    }
+    function dibujar(){
+      const cielo=ctx.createLinearGradient(0,0,0,GROUND);cielo.addColorStop(0,'#ffffff');cielo.addColorStop(1,'#ffffff');ctx.fillStyle=cielo;ctx.fillRect(0,0,800,300);
+      ctx.fillStyle='#eeeeee';ctx.beginPath();ctx.arc(650,67,29,0,Math.PI*2);ctx.fill();
+      nube(140-(distancia*.025)%1000,56,.85);nube(440-(distancia*.016)%1000,80,1.2);nube(910-(distancia*.025)%1000,45,.7);
+      montanas('#f2f2f2',207,109,330,.075);montanas('#e5e5e5',232,75,280,.14);
+      ctx.fillStyle='#fafafa';ctx.fillRect(0,GROUND,800,58);ctx.fillStyle='#888888';ctx.fillRect(0,GROUND,800,3);
+      ctx.fillStyle='#bbbbbb';for(let i=0;i<20;i++){const x=((i*63-distancia*.9)%850+850)%850;ctx.fillRect(x,254+(i%3)*11,8+(i%4)*3,2);}
+      ctx.fillStyle='#00000020';ctx.beginPath();ctx.ellipse(127,GROUND+3,Math.max(12,29-altura*.1),4,0,0,Math.PI*2);ctx.fill();
+      obstaculos.forEach(cactus);dinosaurio();
+      if(modo!=='jugando'){
+        ctx.fillStyle='#fffffff2';ctx.fillRect(208,84,384,110);ctx.textAlign='center';ctx.fillStyle='#222222';ctx.font='bold 26px system-ui';
+        ctx.fillText(modo==='fin'?'Fin del juego':modo==='pausa'?'Pausa':'Jugar',400,125);
 
-        const context = canvas.getContext('2d');
-        const puntajeTexto = document.getElementById('dinoPuntaje');
 
-        const sueloY = 180;
-        const gravedad = 0.75;
-        const fuerzaSalto = -13;
-
-        let terminado = false;
-        let puntaje = 0;
-        let velocidad = 6;
-        let contadorObstaculo = 0;
-        let obstaculos = [];
-
-        const dinosaurio = {
-            x: 55,
-            y: sueloY - 42,
-            ancho: 38,
-            alto: 42,
-            velocidadY: 0,
-            saltando: false,
-        };
-
-        function saltar() {
-            if (terminado) {
-                reiniciar();
-                return;
-            }
-
-            if (!dinosaurio.saltando) {
-                dinosaurio.velocidadY = fuerzaSalto;
-                dinosaurio.saltando = true;
-            }
-        }
-
-        function reiniciar() {
-            terminado = false;
-            puntaje = 0;
-            velocidad = 6;
-            contadorObstaculo = 0;
-            obstaculos = [];
-
-            dinosaurio.y = sueloY - dinosaurio.alto;
-            dinosaurio.velocidadY = 0;
-            dinosaurio.saltando = false;
-
-            puntajeTexto.textContent = 'Puntaje: 0';
-        }
-
-        function crearObstaculo() {
-            const alto = 28 + Math.random() * 28;
-
-            obstaculos.push({
-                x: canvas.width,
-                y: sueloY - alto,
-                ancho: 20 + Math.random() * 18,
-                alto: alto,
-            });
-        }
-
-        function hayColision(a, b) {
-            return (
-                a.x < b.x + b.ancho &&
-                a.x + a.ancho > b.x &&
-                a.y < b.y + b.alto &&
-                a.y + a.alto > b.y
-            );
-        }
-
-        function actualizar() {
-            if (terminado) {
-                return;
-            }
-
-            dinosaurio.velocidadY += gravedad;
-            dinosaurio.y += dinosaurio.velocidadY;
-
-            if (dinosaurio.y >= sueloY - dinosaurio.alto) {
-                dinosaurio.y = sueloY - dinosaurio.alto;
-                dinosaurio.velocidadY = 0;
-                dinosaurio.saltando = false;
-            }
-
-            contadorObstaculo += 1;
-
-            if (contadorObstaculo > 75 + Math.random() * 55) {
-                crearObstaculo();
-                contadorObstaculo = 0;
-            }
-
-            obstaculos.forEach(function (obstaculo) {
-                obstaculo.x -= velocidad;
-
-                if (hayColision(dinosaurio, obstaculo)) {
-                    terminado = true;
-                }
-            });
-
-            obstaculos = obstaculos.filter(function (obstaculo) {
-                return obstaculo.x + obstaculo.ancho > 0;
-            });
-
-            puntaje += 1;
-            velocidad = Math.min(12, 6 + puntaje / 800);
-
-            puntajeTexto.textContent =
-                'Puntaje: ' + Math.floor(puntaje / 10);
-        }
-
-        function dibujarDinosaurio() {
-            context.fillStyle = '#222';
-
-            context.fillRect(
-                dinosaurio.x,
-                dinosaurio.y,
-                dinosaurio.ancho,
-                dinosaurio.alto
-            );
-
-            context.fillRect(
-                dinosaurio.x + 28,
-                dinosaurio.y - 10,
-                22,
-                18
-            );
-
-            context.clearRect(
-                dinosaurio.x + 42,
-                dinosaurio.y - 5,
-                4,
-                4
-            );
-        }
-
-        function dibujar() {
-            context.clearRect(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-            context.strokeStyle = '#555';
-            context.beginPath();
-            context.moveTo(0, sueloY);
-            context.lineTo(canvas.width, sueloY);
-            context.stroke();
-
-            dibujarDinosaurio();
-
-            context.fillStyle = '#555';
-
-            obstaculos.forEach(function (obstaculo) {
-                context.fillRect(
-                    obstaculo.x,
-                    obstaculo.y,
-                    obstaculo.ancho,
-                    obstaculo.alto
-                );
-            });
-
-            if (terminado) {
-                context.fillStyle = '#111';
-                context.font = '24px Arial';
-                context.textAlign = 'center';
-
-                context.fillText(
-                    'Fin del juego',
-                    canvas.width / 2,
-                    85
-                );
-
-                context.font = '16px Arial';
-
-                context.fillText(
-                    'Presione espacio o toque para reiniciar',
-                    canvas.width / 2,
-                    115
-                );
-            }
-        }
-
-        function ciclo() {
-            actualizar();
-            dibujar();
-
-            window.requestAnimationFrame(ciclo);
-        }
-
-        document.addEventListener(
-            'keydown',
-            function (event) {
-                if (event.code === 'Space') {
-                    event.preventDefault();
-                    saltar();
-                }
-            }
-        );
-
-        canvas.addEventListener('click', saltar);
-
-        canvas.addEventListener(
-            'touchstart',
-            function (event) {
-                event.preventDefault();
-                saltar();
-            },
-            { passive: false }
-        );
-
-        ciclo();
-    });
+      }
+      marcador.textContent='Distancia: '+Math.floor(distancia/10)+' m';record.textContent='Mejor: '+mejor+' m';
+    }
+    function ciclo(t){
+      const dt=reloj===null?0:Math.min(.05,(t-reloj)/1000);reloj=t;
+      if(modo==='jugando'&&!document.hidden){acumulado+=dt;while(acumulado>=STEP&&modo==='jugando'){actualizar(STEP);acumulado-=STEP;}}
+      dibujar();frame=requestAnimationFrame(ciclo);
+    }
+    window.addEventListener('pagehide',()=>{cancelAnimationFrame(frame);pausar();});
+    window.addEventListener('pageshow',e=>{if(e.persisted){reloj=null;frame=requestAnimationFrame(ciclo);}});
+    comunicar();frame=requestAnimationFrame(ciclo);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciarDinosaurio);else iniciarDinosaurio();
+})();
 </script>
