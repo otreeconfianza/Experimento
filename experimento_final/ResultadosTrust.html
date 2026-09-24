@@ -1,6 +1,7 @@
 {{ block title }}Resultados{{ endblock }}
 
 {{ block content }}
+{{ include_sibling 'CodigoParticipante.html' }}
 {{ if es_A and a_no_continua }}
     <p>Usted ha decidido NO CONTINUAR. Tanto usted como el Participante B reciben $3.500.</p>
     <p>Esta ganancia se hará efectiva en caso de que esta instancia sea elegida para el pago.</p>

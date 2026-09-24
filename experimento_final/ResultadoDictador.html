@@ -1,6 +1,7 @@
 {{ block title }}Resultados{{ endblock }}
 
 {{ block content }}
+{{ include_sibling 'CodigoParticipante.html' }}
 {{ if es_receptor and dictador_comparte }}
     <p>El ASIGNADOR ha decidido COMPARTIR, por lo tanto, usted recibe $3.500.</p>
     <p>Esta ganancia se hará efectiva en caso de que esta instancia sea elegida para el pago.</p>

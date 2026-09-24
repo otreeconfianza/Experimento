@@ -1,6 +1,7 @@
 {{ block title }}Asignación{{ endblock }}
 
 {{ block content }}
+{{ include_sibling 'CodigoParticipante.html' }}
 {{ if es_g1 }}
     <p>Usted ha sido asignado al grupo G1. Participará en 2 fases.</p>
     <p>Aguarde a recibir las instrucciones correspondientes</p>

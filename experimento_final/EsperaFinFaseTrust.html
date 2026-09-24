@@ -1,6 +1,7 @@
 {{ block title }}{{ endblock }}
 
 {{ block content }}
+{{ include_sibling 'CodigoParticipante.html' }}
 {{ if participo_en_fase }}
     {{ if es_fase_1 }}
         <p>Usted ha completado la Fase 1.</p>
