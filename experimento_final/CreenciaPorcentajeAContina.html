@@ -2,14 +2,26 @@
 
 {{ block content }}
 {{ include_sibling 'CodigoParticipante.html' }}
-<p>
-  Estime qué porcentaje de los demás participantes A elegirá CONTINUAR.
+
+<p class="revision-cambio">
+    Estime el porcentaje de los demás participantes A de esta sesión que elegirá CONTINUAR.
 </p>
 
-{{ formfields }}
+<p class="revision-cambio">
+    Creo que el <span id="porcentajeEnFrase">_____</span>% de los participantes A elegirá CONTINUAR.
+</p>
 
-<p>
-    <em>Si el valor real se encuentra dentro del intervalo elegido, podrá recibir una ganancia de $6.000; de lo contrario, no podrá obtener una ganancia por esa estimación.</em>
+{{ include_sibling 'BarraCreencia.html' }}
+<p class="revision-cambio">
+    Por cada estimación que difiera en no más de 5 puntos porcentuales del porcentaje real, recibirá $6.000.
+</p>
+
+<p class="revision-cambio">
+    Por cada estimación que difiera en más de 5 puntos porcentuales del porcentaje real, recibirá $0.
+</p>
+
+<p class="revision-cambio">
+    Si esta instancia es elegida para el pago, recibirá la suma de los pagos correspondientes a ambas predicciones.
 </p>
 
 {{ include_sibling 'AyudaTrust.html' }}

@@ -1,8 +1,35 @@
+{{ include_sibling 'ResaltadoRevision.html' }}
 <aside class="codigo-participante" aria-label="Código de participante">
     Código: <strong>{{ participant.code }}</strong>
 </aside>
 
 <style>
+    /* Diseño común de las barras de predicciones, riesgo y confianza. */
+    .escala-slider {
+        width: 100%;
+        margin-top: 14px;
+        cursor: pointer;
+    }
+
+    .valor-slider {
+        display: inline-block;
+        min-width: 150px;
+        margin-top: 12px;
+        padding: 8px 14px;
+        border-radius: 20px;
+        background-color: #f1f5f9;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .extremos-slider {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        font-size: 14px;
+        color: #555;
+    }
+
     .codigo-participante {
         position: fixed;
         top: 10px;

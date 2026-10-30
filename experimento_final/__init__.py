@@ -52,13 +52,7 @@ class C(BaseConstants):
     NORM_PAYMENT_PER_MATCH = cu(3000)
     VIATICOS = cu(3000)
 
-    INTERVAL_CHOICES = [
-        ['0_20', '0–20%'],
-        ['20_40', '20–40%'],
-        ['40_60', '40–60%'],
-        ['60_80', '60–80%'],
-        ['80_100', '80–100%'],
-    ]
+    BELIEF_TOLERANCE_PP = 5
 
     NORM_CHOICES = [
         [1, '1 - Muy inapropiada'],
@@ -118,31 +112,27 @@ class Player(BasePlayer):
     # ------------------------------------------------------------
     # Fase 1: G1 = A, G2 = B
     # ------------------------------------------------------------
-    creencia_a_b_comparte_f1 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
+    creencia_a_b_comparte_f1 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
-    creencia_a_porcentaje_a_continua_f1 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
+    creencia_a_porcentaje_a_continua_f1 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
-    creencia_b_decision_a_f1 = models.StringField(
-        choices=[
-            ['no_continuar', 'NO CONTINUAR'],
-            ['continuar', 'CONTINUAR'],
-        ],
+    creencia_b_estimacion_a_f1 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
-    creencia_b_porcentaje_a_continua_f1 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
-        label='',
-        blank=True,
-    )
-    creencia_b_porcentaje_b_comparte_f1 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
+    creencia_b_porcentaje_a_continua_f1 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
@@ -168,31 +158,27 @@ class Player(BasePlayer):
     # ------------------------------------------------------------
     # Fase 2: G2 = A, G3 = B
     # ------------------------------------------------------------
-    creencia_a_b_comparte_f2 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
+    creencia_a_b_comparte_f2 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
-    creencia_a_porcentaje_a_continua_f2 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
+    creencia_a_porcentaje_a_continua_f2 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
-    creencia_b_decision_a_f2 = models.StringField(
-        choices=[
-            ['no_continuar', 'NO CONTINUAR'],
-            ['continuar', 'CONTINUAR'],
-        ],
+    creencia_b_estimacion_a_f2 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
-    creencia_b_porcentaje_a_continua_f2 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
-        label='',
-        blank=True,
-    )
-    creencia_b_porcentaje_b_comparte_f2 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
+    creencia_b_porcentaje_a_continua_f2 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
@@ -218,31 +204,27 @@ class Player(BasePlayer):
     # ------------------------------------------------------------
     # Fase 3: G3 = A, G4 = B
     # ------------------------------------------------------------
-    creencia_a_b_comparte_f3 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
+    creencia_a_b_comparte_f3 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
-    creencia_a_porcentaje_a_continua_f3 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
+    creencia_a_porcentaje_a_continua_f3 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
-    creencia_b_decision_a_f3 = models.StringField(
-        choices=[
-            ['no_continuar', 'NO CONTINUAR'],
-            ['continuar', 'CONTINUAR'],
-        ],
+    creencia_b_estimacion_a_f3 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
-    creencia_b_porcentaje_a_continua_f3 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
-        label='',
-        blank=True,
-    )
-    creencia_b_porcentaje_b_comparte_f3 = models.StringField(
-        choices=C.INTERVAL_CHOICES,
+    creencia_b_porcentaje_a_continua_f3 = models.IntegerField(
+        min=0,
+        max=100,
         label='',
         blank=True,
     )
@@ -306,6 +288,17 @@ class Player(BasePlayer):
     # ------------------------------------------------------------
     # Cuestionario final
     # ------------------------------------------------------------
+    genero = models.StringField(
+        label='Género',
+        choices=[
+            ['hombre', 'Hombre'],
+            ['mujer', 'Mujer'],
+            ['prefiero_no_decirlo', 'Prefiero no decirlo'],
+        ],
+        widget=widgets.RadioSelect,
+        blank=True,
+    )
+
     edad = models.IntegerField(
 
     label='Edad',
@@ -378,11 +371,19 @@ class Player(BasePlayer):
 
         'Tucumán',
 
+        'Otro',
+
     ],
 
     blank=True,
 
 )
+
+    lugar_origen_otro = models.StringField(
+        label='Especifique su lugar de origen (país o región)',
+        blank=True,
+        max_length=255,
+    )
 
     riesgo_general = models.IntegerField(
 
@@ -491,9 +492,8 @@ class Player(BasePlayer):
         return dict(
             creencia_a=f'creencia_a_b_comparte_f{fase}',
             creencia_a_porcentaje=f'creencia_a_porcentaje_a_continua_f{fase}',
-            creencia_b_decision=f'creencia_b_decision_a_f{fase}',
+            creencia_b_estimacion_a=f'creencia_b_estimacion_a_f{fase}',
             creencia_b_porcentaje=f'creencia_b_porcentaje_a_continua_f{fase}',
-            creencia_b_porcentaje_b_comparte=f'creencia_b_porcentaje_b_comparte_f{fase}',
             decision_a=f'decision_a_f{fase}',
             decision_b=f'decision_b_f{fase}',
             pago_juego=f'pago_juego_confianza_f{fase}',
@@ -622,20 +622,6 @@ def formar_grupos_dictador(subsession: Subsession):
 # AUXILIARES
 # ----------------------------------------------------------------
 
-def percentage_to_interval_code(value):
-    if value is None:
-        return None
-    if value < 20:
-        return '0_20'
-    if value < 40:
-        return '20_40'
-    if value < 60:
-        return '40_60'
-    if value < 80:
-        return '60_80'
-    return '80_100'
-
-
 def percentage_yes(players, field_name, yes_value):
     valid_values = []
 
@@ -663,26 +649,16 @@ def modal_response(values):
 
     max_count = max(counts.values())
     modals = [k for k, v in counts.items() if v == max_count]
-    return min(modals)
+    return random.choice(modals)
 
 
-def score_interval_exact(predicted_interval_code, realized_interval_code):
-    if predicted_interval_code is None or realized_interval_code is None:
+def score_percentage(predicted_percentage, realized_percentage):
+    if predicted_percentage is None or realized_percentage is None:
         return cu(0)
-
-    if predicted_interval_code == realized_interval_code:
-        return C.BELIEF_PAYMENT
-
-    return cu(0)
-
-
-def score_binary_exact(predicted_value, realized_value):
-    if predicted_value is None or realized_value is None:
+    if not (0 <= predicted_percentage <= 100 and 0 <= realized_percentage <= 100):
         return cu(0)
-
-    if predicted_value == realized_value:
+    if abs(predicted_percentage - realized_percentage) <= C.BELIEF_TOLERANCE_PP:
         return C.BELIEF_PAYMENT
-
     return cu(0)
 
 
@@ -743,38 +719,34 @@ def compute_belief_payoffs_trust(subsession: Subsession):
     realized_pct_b_share = percentage_yes(players_b, field_b_decision, 'compartir')
     realized_pct_a_continue = percentage_yes(players_a, field_a_decision, 'continuar')
 
-    realized_b_share_code = percentage_to_interval_code(realized_pct_b_share)
-    realized_a_continue_code = percentage_to_interval_code(realized_pct_a_continue)
 
     for p in players:
         fields = p.trust_fields()
         pago = cu(0)
 
         if p.rol_en_ronda == C.ROLE_A:
-            pago = score_interval_exact(
+            otros_a = [a for a in players_a if a.id_in_subsession != p.id_in_subsession]
+            realized_other_a_percentage = percentage_yes(otros_a, field_a_decision, 'continuar')
+            pago = score_percentage(
                 p.field_maybe_none(fields['creencia_a']),
-                realized_b_share_code,
+                realized_pct_b_share,
             )
-            pago += score_interval_exact(
+            pago += score_percentage(
                 p.field_maybe_none(fields['creencia_a_porcentaje']),
-                realized_a_continue_code,
+                realized_other_a_percentage,
             )
 
         elif p.rol_en_ronda == C.ROLE_B:
             a = p.group.a_player()
-            a_decision = a.field_maybe_none(fields['decision_a']) if a else None
+            a_estimation = a.field_maybe_none(fields['creencia_a']) if a else None
 
-            pago += score_binary_exact(
-                p.field_maybe_none(fields['creencia_b_decision']),
-                a_decision,
+            pago += score_percentage(
+                p.field_maybe_none(fields['creencia_b_estimacion_a']),
+                a_estimation,
             )
-            pago += score_interval_exact(
+            pago += score_percentage(
                 p.field_maybe_none(fields['creencia_b_porcentaje']),
-                realized_a_continue_code,
-            )
-            pago += score_interval_exact(
-                p.field_maybe_none(fields['creencia_b_porcentaje_b_comparte']),
-                a.field_maybe_none(fields['creencia_a']) if a else None,
+                realized_pct_a_continue,
             )
 
         setattr(p, fields['pago_creencias'], pago)
@@ -809,24 +781,28 @@ def set_payoffs_dictator(group: Group):
 def compute_norms_payoffs(subsession: Subsession):
     players = subsession.get_players()
 
-    modal_1 = modal_response([p.field_maybe_none('norma_no_continuar_a') for p in players])
-    modal_2 = modal_response([p.field_maybe_none('norma_continuar_a') for p in players])
-    modal_3 = modal_response([p.field_maybe_none('norma_b_no_compartir') for p in players])
-    modal_4 = modal_response([p.field_maybe_none('norma_b_compartir') for p in players])
+    norm_fields = [
+        'norma_no_continuar_a',
+        'norma_continuar_a',
+        'norma_b_no_compartir',
+        'norma_b_compartir',
+    ]
+    # Un único sorteo por pregunta, común a todos y conservado en la sesión.
+    modals = subsession.session.vars.get('normas_respuestas_pago')
+    if modals is None:
+        modals = {
+            field: modal_response([p.field_maybe_none(field) for p in players])
+            for field in norm_fields
+        }
+        subsession.session.vars['normas_respuestas_pago'] = modals
 
     for p in players:
-        pago = cu(0)
-
-        if p.field_maybe_none('norma_no_continuar_a') == modal_1:
-            pago += C.NORM_PAYMENT_PER_MATCH
-        if p.field_maybe_none('norma_continuar_a') == modal_2:
-            pago += C.NORM_PAYMENT_PER_MATCH
-        if p.field_maybe_none('norma_b_no_compartir') == modal_3:
-            pago += C.NORM_PAYMENT_PER_MATCH
-        if p.field_maybe_none('norma_b_compartir') == modal_4:
-            pago += C.NORM_PAYMENT_PER_MATCH
-
-        p.pago_normas = pago
+        p.pago_normas = sum(
+            (C.NORM_PAYMENT_PER_MATCH for field in norm_fields
+             if modals[field] is not None
+             and p.field_maybe_none(field) == modals[field]),
+            cu(0),
+        )
 
 
 # ----------------------------------------------------------------
@@ -1050,10 +1026,14 @@ class CreenciaParticipanteA(Page):
         return [player.trust_fields()['creencia_a']]
 
     @staticmethod
+    def vars_for_template(player):
+        return dict(belief_field=player.trust_fields()['creencia_a'])
+
+    @staticmethod
     def error_message(player, values):
         field = player.trust_fields()['creencia_a']
-        if not values.get(field):
-            return 'Debe seleccionar una opción para continuar.'
+        if values.get(field) is None:
+            return 'Debe mover la barra para indicar un porcentaje antes de continuar.'
 
 
 class CreenciaPorcentajeAContina(Page):
@@ -1068,13 +1048,17 @@ class CreenciaPorcentajeAContina(Page):
         return [player.trust_fields()['creencia_a_porcentaje']]
 
     @staticmethod
+    def vars_for_template(player):
+        return dict(belief_field=player.trust_fields()['creencia_a_porcentaje'])
+
+    @staticmethod
     def error_message(player, values):
         field = player.trust_fields()['creencia_a_porcentaje']
-        if not values.get(field):
-            return 'Debe seleccionar una opción para continuar.'
+        if values.get(field) is None:
+            return 'Debe mover la barra para indicar un porcentaje antes de continuar.'
 
 
-class CreenciaBDecisionA(Page):
+class CreenciaBEstimacionA(Page):
     form_model = 'player'
 
     @staticmethod
@@ -1083,13 +1067,17 @@ class CreenciaBDecisionA(Page):
 
     @staticmethod
     def get_form_fields(player: Player):
-        return [player.trust_fields()['creencia_b_decision']]
+        return [player.trust_fields()['creencia_b_estimacion_a']]
+
+    @staticmethod
+    def vars_for_template(player):
+        return dict(belief_field=player.trust_fields()['creencia_b_estimacion_a'])
 
     @staticmethod
     def error_message(player, values):
-        field = player.trust_fields()['creencia_b_decision']
-        if not values.get(field):
-            return 'Debe seleccionar una opción para continuar.'
+        field = player.trust_fields()['creencia_b_estimacion_a']
+        if values.get(field) is None:
+            return 'Debe mover la barra para indicar un porcentaje antes de continuar.'
 
 
 class CreenciaBPorcentajeA(Page):
@@ -1104,28 +1092,14 @@ class CreenciaBPorcentajeA(Page):
         return [player.trust_fields()['creencia_b_porcentaje']]
 
     @staticmethod
+    def vars_for_template(player):
+        return dict(belief_field=player.trust_fields()['creencia_b_porcentaje'])
+
+    @staticmethod
     def error_message(player, values):
         field = player.trust_fields()['creencia_b_porcentaje']
-        if not values.get(field):
-            return 'Debe seleccionar una opción para continuar.'
-
-
-class CreenciaBPorcentajeBComparte(Page):
-    form_model = 'player'
-
-    @staticmethod
-    def is_displayed(player: Player):
-        return player.round_number in [1, 2, 3] and player.es_participante_b()
-
-    @staticmethod
-    def get_form_fields(player: Player):
-        return [player.trust_fields()['creencia_b_porcentaje_b_comparte']]
-
-    @staticmethod
-    def error_message(player, values):
-        field = player.trust_fields()['creencia_b_porcentaje_b_comparte']
-        if not values.get(field):
-            return 'Debe seleccionar una opción para continuar.'
+        if values.get(field) is None:
+            return 'Debe mover la barra para indicar un porcentaje antes de continuar.'
 
 
 class DecisionParticipanteA(Page):
@@ -1427,8 +1401,10 @@ class CuestionarioFinal(Page):
     form_model = 'player'
     form_fields = [
         'edad',
+        'genero',
         'carrera',
         'lugar_origen',
+        'lugar_origen_otro',
         'riesgo_general',
         'confianza_general',
     ]
@@ -1441,6 +1417,7 @@ class CuestionarioFinal(Page):
     def error_message(player, values):
         required_fields = [
             'edad',
+            'genero',
             'carrera',
             'lugar_origen',
             'riesgo_general',
@@ -1450,6 +1427,16 @@ class CuestionarioFinal(Page):
         for field in required_fields:
             if values.get(field) is None or values.get(field) == '':
                 return 'Debe completar todos los campos para continuar.'
+
+        if values.get('lugar_origen') == 'Otro' and not (values.get('lugar_origen_otro') or '').strip():
+            return 'Debe especificar su lugar de origen si selecciona Otro.'
+
+    @staticmethod
+    def before_next_page(player, timeout_happened):
+        player.lugar_origen_otro = (
+            (player.field_maybe_none('lugar_origen_otro') or '').strip()
+            if player.lugar_origen == 'Otro' else ''
+        )
 
 class Resultados(Page):
     @staticmethod
@@ -1521,27 +1508,6 @@ class Resultados(Page):
             microsoft_forms_url='https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=l9b-Sf8B1kKlo25lunDYntXP2DRyIjhJgSaUU6CvWAtUQklCT1NWNzc1QTAyUjBUQzVTN0o3V1JTMy4u',
         )
     
-class Cierre(Page):
-    @staticmethod
-    def is_displayed(player: Player):
-        return player.round_number == 4
-
-    @staticmethod
-    def vars_for_template(player: Player):
-        return dict(
-            grupo=player.grupo_experimental,
-            pago_juego_confianza_f1=get_payment_from_round(player, 1, 'pago_juego_confianza_f1'),
-            pago_creencias_f1=get_payment_from_round(player, 1, 'pago_creencias_f1'),
-            pago_juego_confianza_f2=get_payment_from_round(player, 2, 'pago_juego_confianza_f2'),
-            pago_creencias_f2=get_payment_from_round(player, 2, 'pago_creencias_f2'),
-            pago_juego_confianza_f3=get_payment_from_round(player, 3, 'pago_juego_confianza_f3'),
-            pago_creencias_f3=get_payment_from_round(player, 3, 'pago_creencias_f3'),
-            pago_dictador=player.pago_dictador or cu(0),
-            pago_normas=player.pago_normas or cu(0),
-            pago_seleccionado_label=player.pago_seleccionado_label,
-            pago_final=player.payoff or cu(0),
-        )
-
 
 page_sequence = [
     Consentimiento,
@@ -1557,9 +1523,8 @@ page_sequence = [
     DecisionParticipanteA,
 
     InstruccionesParticipanteB,
-    CreenciaBDecisionA,
     CreenciaBPorcentajeA,
-    CreenciaBPorcentajeBComparte,
+    CreenciaBEstimacionA,
 
     WaitForADecision,
     DecisionParticipanteB,
@@ -1583,5 +1548,4 @@ page_sequence = [
 
     CuestionarioFinal,
     Resultados,
-    Cierre,
 ]

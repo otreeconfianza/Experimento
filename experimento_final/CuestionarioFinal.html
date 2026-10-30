@@ -9,6 +9,10 @@ Cuestionario final
     {{ formfield 'edad' }}
 </div>
 
+<div class="campo-cuestionario revision-cambio">
+    {{ formfield 'genero' }}
+</div>
+
 <div class="campo-cuestionario">
     <label class="form-label" for="carrera_selector">Carrera</label>
     <select
@@ -17,6 +21,21 @@ Cuestionario final
         required
         aria-describedby="carrera_ayuda">
         <option value="" selected disabled>Seleccione una carrera</option>
+
+        <!-- Fuente: https://uca.edu.ar/es/facultad-de-ciencias-economicas/alumnos/inscripciones-a-materias -->
+        <optgroup label="Facultad de Ciencias Económicas" class="revision-cambio">
+            <option value="Administración de Empresas">Licenciatura en Administración de Empresas</option>
+            <option value="Licenciatura en Analítica de Negocios">Licenciatura en Analítica de Negocios</option>
+            <option value="Licenciatura en Comercio y Negocios Globales">Licenciatura en Comercio y Negocios Globales</option>
+            <option value="Contador Público">Contador Público</option>
+            <option value="Economía">Licenciatura en Economía</option>
+            <option value="Licenciatura en Economía Empresarial">Licenciatura en Economía Empresarial</option>
+            <option value="Licenciatura en Finanzas">Licenciatura en Finanzas</option>
+            <option value="Licenciatura en Gestión de Negocios Digitales">Licenciatura en Gestión de Negocios Digitales</option>
+            <option value="Licenciatura en Gestión del Liderazgo y Desarrollo Organizacional">Licenciatura en Gestión del Liderazgo y Desarrollo Organizacional</option>
+            <option value="Licenciatura en Marketing">Licenciatura en Marketing</option>
+            <option value="Licenciatura en Recursos Humanos">Licenciatura en Recursos Humanos</option>
+        </optgroup>
 
         <optgroup label="Facultad de Ingeniería y Ciencias Agrarias">
             <option value="Ingeniería Agronómica">Ingeniería Agronómica</option>
@@ -34,9 +53,6 @@ Cuestionario final
 
         <optgroup label="Otras facultades">
             <option value="Abogacía">Abogacía</option>
-            <option value="Administración de Empresas">Administración de Empresas</option>
-            <option value="Contador Público">Contador Público</option>
-            <option value="Economía">Economía</option>
             <option value="Medicina">Medicina</option>
             <option value="Psicología">Psicología</option>
         </optgroup>
@@ -63,6 +79,10 @@ Cuestionario final
 
 <div class="campo-cuestionario">
     {{ formfield 'lugar_origen' }}
+</div>
+
+<div id="lugar_origen_otro_contenedor" class="campo-cuestionario revision-cambio" hidden>
+    {{ formfield 'lugar_origen_otro' }}
 </div>
 
 <div class="campo-cuestionario">
@@ -150,35 +170,14 @@ Cuestionario final
         margin-top: 16px;
     }
 
-    .escala-slider {
-        width: 100%;
-        margin-top: 14px;
-        cursor: pointer;
-    }
 
-    .valor-slider {
-        display: inline-block;
-        min-width: 150px;
-        margin-top: 12px;
-        padding: 8px 14px;
-        border-radius: 20px;
-        background-color: #f1f5f9;
-        font-weight: 600;
-        text-align: center;
-    }
 
-    .extremos-slider {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 5px;
-        font-size: 14px;
-        color: #555;
-    }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         configurarCarrera();
+        configurarOrigen();
 
         configurarSlider(
             'riesgo_general_slider',
@@ -192,6 +191,22 @@ Cuestionario final
             'confianza_general_input'
         );
     });
+
+    function configurarOrigen() {
+        const selector = document.getElementById('id_lugar_origen');
+        const contenedor = document.getElementById('lugar_origen_otro_contenedor');
+        const otroInput = document.getElementById('id_lugar_origen_otro');
+        if (!selector || !contenedor || !otroInput) return;
+
+        function actualizarOrigen() {
+            const esOtro = selector.value === 'Otro';
+            contenedor.hidden = !esOtro;
+            otroInput.required = esOtro;
+            if (!esOtro) otroInput.value = '';
+        }
+        selector.addEventListener('change', actualizarOrigen);
+        actualizarOrigen();
+    }
 
     function configurarCarrera() {
         const selector = document.getElementById('carrera_selector');
