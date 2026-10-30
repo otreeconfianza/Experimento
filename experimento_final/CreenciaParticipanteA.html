@@ -3,23 +3,31 @@
 {{ block content }}
 {{ include_sibling 'CodigoParticipante.html' }}
 
-<p>
-    Como se explicó anteriormente, cada Participante B que reciba un monto de dinero por parte de un
-    Participante A, una vez duplicado el monto, deberá decidir si compartir o no una parte de éste al
-    Participante A.
-</p>
-<p>
-    ¿Qué porcentaje de sujetos B en su sesión cree usted que elegirá COMPARTIR?
+<p class="revision-cambio">
+    Considerando la situación descripta anteriormente, le pedimos que realice las siguientes
+    predicciones (puede consultar la descripción de la situación presionando el botón de ayuda):
 </p>
 
-<p>Puede consultar la descripción de la situación presionando el botón de ayuda.</p>
+<p class="revision-cambio">
+    Estime el porcentaje de participantes B de esta sesión que elegirá COMPARTIR.
+</p>
 
-{{ formfields }}
+<p class="revision-cambio">
+    Creo que el <span id="porcentajeEnFrase">_____</span>% de los participantes B elegirá COMPARTIR.
+</p>
 
-<p>
-    <em>Si esta pregunta es seleccionada para el pago, podrá obtener una ganancia dependiendo de la
-    precisión de su predicción: Si el valor real se encuentra dentro del intervalo que usted eligió,
-    podrá recibir un monto de $6.000. De lo contrario, no obtendrá ganancias en esta instancia.</em>
+{{ include_sibling 'BarraCreencia.html' }}
+
+<p class="revision-cambio">
+    Por cada estimación que difiera en no más de 5 puntos porcentuales del porcentaje real, recibirá $6.000.
+</p>
+
+<p class="revision-cambio">
+    Por cada estimación que difiera en más de 5 puntos porcentuales del porcentaje real, recibirá $0.
+</p>
+
+<p class="revision-cambio">
+    Si esta instancia es elegida para el pago, recibirá la suma de los pagos correspondientes a ambas predicciones.
 </p>
 
 {{ include_sibling 'AyudaTrust.html' }}

@@ -1,0 +1,43 @@
+<div class="creencia-porcentaje" style="margin-bottom:30px">
+    <output id="valorBarra" class="valor-slider" for="barraCreencia" aria-live="polite">Sin respuesta: mueva la barra.</output>
+    <input id="barraCreencia" class="form-range escala-slider" type="range" min="0" max="100" step="1" value="50"
+           aria-label="Estimación porcentual" aria-describedby="instruccionBarra valorBarra">
+    <input id="respuestaCreencia" type="hidden" name="{{ belief_field }}" value="">
+    <div class="extremos-slider"><span class="revision-cambio">0%</span><span class="revision-cambio">100%</span></div>
+    <small id="instruccionBarra" class="revision-cambio" style="display:block;margin-top:6px;font-size:0.85em">Indique su estimación entre 0% y 100%.</small>
+</div>
+<noscript><p class="revision-cambio">Debe habilitar JavaScript para responder con la barra.</p></noscript>
+<script>
+(function () {
+    function prepararBarra() {
+        const barra = document.getElementById('barraCreencia');
+        const respuesta = document.getElementById('respuestaCreencia');
+        const salida = document.getElementById('valorBarra');
+        const formulario = barra.closest('form');
+        const botones = formulario.querySelectorAll('button[type="submit"], input[type="submit"], .otree-btn-next');
+        let movida = false;
+        botones.forEach(boton => { boton.disabled = true; });
+        barra.addEventListener('input', function () {
+            if (barra.value !== '50') movida = true;
+            if (!movida) return;
+            respuesta.value = barra.value;
+            salida.textContent = 'Su estimación: ' + barra.value + '%';
+            const porcentajeEnFrase = document.getElementById('porcentajeEnFrase');
+            if (porcentajeEnFrase) porcentajeEnFrase.textContent = barra.value;
+            botones.forEach(boton => { boton.disabled = false; });
+        });
+        formulario.addEventListener('submit', function (evento) {
+            if (!movida || respuesta.value === '') {
+                evento.preventDefault();
+                salida.textContent = 'Mueva la barra antes de continuar.';
+                barra.focus();
+            }
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', prepararBarra);
+    } else {
+        prepararBarra();
+    }
+})();
+</script>
