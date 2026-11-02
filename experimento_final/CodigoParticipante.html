@@ -1,4 +1,4 @@
-{{ include_sibling 'ResaltadoRevision.html' }}
+
 <aside class="codigo-participante" aria-label="Código de participante">
     Código: <strong>{{ participant.code }}</strong>
 </aside>
@@ -48,8 +48,13 @@
 
     @media (max-width: 600px) {
         .codigo-participante {
-            top: 6px;
-            right: 6px;
+            position: static;
+            display: table;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin: 0 0 16px auto;
+            white-space: normal;
+            overflow-wrap: anywhere;
             padding: 5px 8px;
             font-size: 12px;
         }

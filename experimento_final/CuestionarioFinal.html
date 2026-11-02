@@ -9,7 +9,7 @@ Cuestionario final
     {{ formfield 'edad' }}
 </div>
 
-<div class="campo-cuestionario revision-cambio">
+<div class="campo-cuestionario">
     {{ formfield 'genero' }}
 </div>
 
@@ -23,7 +23,7 @@ Cuestionario final
         <option value="" selected disabled>Seleccione una carrera</option>
 
         <!-- Fuente: https://uca.edu.ar/es/facultad-de-ciencias-economicas/alumnos/inscripciones-a-materias -->
-        <optgroup label="Facultad de Ciencias Económicas" class="revision-cambio">
+        <optgroup label="Facultad de Ciencias Económicas">
             <option value="Administración de Empresas">Licenciatura en Administración de Empresas</option>
             <option value="Licenciatura en Analítica de Negocios">Licenciatura en Analítica de Negocios</option>
             <option value="Licenciatura en Comercio y Negocios Globales">Licenciatura en Comercio y Negocios Globales</option>
@@ -81,7 +81,7 @@ Cuestionario final
     {{ formfield 'lugar_origen' }}
 </div>
 
-<div id="lugar_origen_otro_contenedor" class="campo-cuestionario revision-cambio" hidden>
+<div id="lugar_origen_otro_contenedor" class="campo-cuestionario" hidden>
     {{ formfield 'lugar_origen_otro' }}
 </div>
 
@@ -89,7 +89,7 @@ Cuestionario final
 
     <label class="form-label" for="riesgo_general_slider">
         Indique, en términos generales, en qué medida está dispuesto o no a asumir riesgos.
-        Utilice una escala del 1 al 10, donde 1 significa muy poco dispuesto a asumir riesgos
+        Utilice una escala del 0 al 10, donde 0 significa muy poco dispuesto a asumir riesgos
         y 10 significa muy dispuesto a asumir riesgos.
     </label>
 
@@ -103,7 +103,7 @@ Cuestionario final
         id="riesgo_general_slider"
         class="form-range escala-slider"
         type="range"
-        min="1"
+        min="0"
         max="10"
         step="1"
         value="5"
@@ -116,7 +116,7 @@ Cuestionario final
         value="">
 
     <div class="extremos-slider">
-        <span>1</span>
+        <span>0</span>
         <span>10</span>
     </div>
 
@@ -159,11 +159,35 @@ Cuestionario final
 
 </div>
 
+<div class="campo-cuestionario">
+    {{ formfield 'experimento_previo' }}
+</div>
+
+<div class="campo-cuestionario">
+    {{ formfield 'conocimiento_teoria_juegos' }}
+</div>
+
 {{ next_button }}
 
 <style>
     .campo-cuestionario {
         margin-bottom: 30px;
+        min-width: 0;
+    }
+
+    .campo-cuestionario .controls,
+    .campo-cuestionario .form-group {
+        min-width: 0;
+    }
+
+    .campo-cuestionario select,
+    .campo-cuestionario input[type="text"],
+    .campo-cuestionario input[type="number"],
+    .campo-cuestionario textarea {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
 
     .carrera-otra {

@@ -1,29 +1,31 @@
-{{ block title }}Predicción 2{{ endblock }}
+{{ block title }}Predicciones{{ endblock }}
 
 {{ block content }}
 {{ include_sibling 'CodigoParticipante.html' }}
 
-<p class="revision-cambio">
+<strong>Predicción 2:</strong>
+
+<p>
     Le hemos pedido al participante A con quien está emparejado que estime el porcentaje de
     participantes B que elegirá COMPARTIR. Ahora le pedimos que estime cuál fue la respuesta de A.
 </p>
 
-<p class="revision-cambio">
+<p>
     Creo que el participante A con quien estoy emparejado estima que el
     <span id="porcentajeEnFrase">_____</span>% de los participantes B elegirá COMPARTIR.
 </p>
 
 {{ include_sibling 'BarraCreencia.html' }}
 
-<p class="revision-cambio">
-    Por cada estimación que difiera en no más de 5 puntos porcentuales del valor de referencia, recibirá $6.000.
+<p>
+    Por cada estimación que difiera en no más de 5 puntos porcentuales del porcentaje real, recibirá $6.000.
 </p>
 
-<p class="revision-cambio">
-    Por cada estimación que difiera en más de 5 puntos porcentuales del valor de referencia, recibirá $0.
+<p>
+    Por cada estimación que difiera en más de 5 puntos porcentuales del porcentaje real, recibirá $0.
 </p>
 
-<p class="revision-cambio">
+<p>
     Si esta instancia es elegida para el pago, recibirá la suma de los pagos correspondientes a ambas predicciones.
 </p>
 

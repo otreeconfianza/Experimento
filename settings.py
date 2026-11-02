@@ -17,8 +17,8 @@ SESSION_CONFIG_DEFAULTS = dict(
 
 ROOMS = [
     dict(
-        name='piloto',
-        display_name='Piloto',
+        name='actividad_final',
+        display_name='Actividad final',
     ),
 ]
 

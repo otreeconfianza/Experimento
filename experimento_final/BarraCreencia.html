@@ -3,10 +3,10 @@
     <input id="barraCreencia" class="form-range escala-slider" type="range" min="0" max="100" step="1" value="50"
            aria-label="Estimación porcentual" aria-describedby="instruccionBarra valorBarra">
     <input id="respuestaCreencia" type="hidden" name="{{ belief_field }}" value="">
-    <div class="extremos-slider"><span class="revision-cambio">0%</span><span class="revision-cambio">100%</span></div>
-    <small id="instruccionBarra" class="revision-cambio" style="display:block;margin-top:6px;font-size:0.85em">Indique su estimación entre 0% y 100%.</small>
+    <div class="extremos-slider"><span>0%</span><span>100%</span></div>
+    <small id="instruccionBarra" style="display:block;margin-top:6px;font-size:0.85em">Indique su estimación entre 0% y 100%.</small>
 </div>
-<noscript><p class="revision-cambio">Debe habilitar JavaScript para responder con la barra.</p></noscript>
+<noscript><p>Debe habilitar JavaScript para responder con la barra.</p></noscript>
 <script>
 (function () {
     function prepararBarra() {

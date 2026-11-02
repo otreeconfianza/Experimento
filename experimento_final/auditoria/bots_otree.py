@@ -41,7 +41,7 @@ class PlayerBot(Bot):
             yield InstruccionesNormas
             for page,field in [(Norma1,'norma_no_continuar_a'),(Norma2,'norma_continuar_a'),(Norma3,'norma_b_no_compartir'),(Norma4,'norma_b_compartir')]:
                 yield page, {field:1}
-            yield CuestionarioFinal, dict(edad=25,genero='prefiero_no_decirlo',carrera='Economía',lugar_origen='Buenos Aires',riesgo_general=5,confianza_general=0)
+            yield CuestionarioFinal, dict(edad=25,genero='prefiero_no_decirlo',carrera='Economía',lugar_origen='Buenos Aires',riesgo_general=5,confianza_general=0,experimento_previo='no',conocimiento_teoria_juegos='si')
             p = self.player
             assert p.pago_normas == 12000
             assert p.payoff >= 3000
