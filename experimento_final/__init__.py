@@ -391,15 +391,15 @@ class Player(BasePlayer):
 
         'Indique, en términos generales, en qué medida está dispuesto '
 
-        'o no a asumir riesgos. Utilice una escala del 1 al 10, donde '
+        'o no a asumir riesgos. Utilice una escala del 0 al 10, donde '
 
-        '1 significa muy poco dispuesto a asumir riesgos y 10 significa '
+        '0 significa muy poco dispuesto a asumir riesgos y 10 significa '
 
         'muy dispuesto a asumir riesgos.'
 
     ),
 
-    min=1,
+    min=0,
 
     max=10,
 
@@ -429,6 +429,19 @@ class Player(BasePlayer):
 
 )
     
+
+    experimento_previo = models.StringField(
+        label='¿Ha participado en algún experimento económico (similar a este) anteriormente?',
+        choices=[['si', 'Sí'], ['no', 'No']],
+        widget=widgets.RadioSelect,
+        blank=True,
+    )
+    conocimiento_teoria_juegos = models.StringField(
+        label='¿Tiene conocimiento sobre Teoría de Juegos?',
+        choices=[['si', 'Sí'], ['no', 'No']],
+        widget=widgets.RadioSelect,
+        blank=True,
+    )
 
     # ------------------------------------------------------------
     # Pago final y control
@@ -1219,7 +1232,16 @@ class EsperaFinFaseTrust(WaitPage):
 
     @staticmethod
     def vars_for_template(player: Player):
+        # Al llegar a esta espera, quien estuvo activo ya pasó por ResultadosTrust.
+        # Las rondas anteriores conservan los roles que tuvo cada participante.
+        fases_completadas = [
+            fase for fase in range(1, min(player.round_number, 3) + 1)
+            if player.in_round(fase).participa_en_trust_round_actual()
+        ]
+        ultima_fase_completada = max(fases_completadas, default=0)
         return dict(
+            ya_participo=bool(fases_completadas),
+            ultima_fase_completada=ultima_fase_completada,
             fase=player.round_number,
             es_fase_1=player.round_number == 1,
             es_fase_2=player.round_number == 2,
@@ -1407,6 +1429,8 @@ class CuestionarioFinal(Page):
         'lugar_origen_otro',
         'riesgo_general',
         'confianza_general',
+        'experimento_previo',
+        'conocimiento_teoria_juegos',
     ]
 
     @staticmethod
@@ -1422,6 +1446,8 @@ class CuestionarioFinal(Page):
             'lugar_origen',
             'riesgo_general',
             'confianza_general',
+            'experimento_previo',
+            'conocimiento_teoria_juegos',
         ]
 
         for field in required_fields:

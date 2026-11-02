@@ -1,32 +1,34 @@
-{{ block title }}Predicción 1{{ endblock }}
+{{ block title }}Predicciones{{ endblock }}
 
 {{ block content }}
 {{ include_sibling 'CodigoParticipante.html' }}
 
-<p class="revision-cambio">
+<p>
     Considerando la situación descripta anteriormente, le pedimos que realice las siguientes
     predicciones (puede consultar la descripción de la situación presionando el botón de ayuda):
 </p>
 
-<p class="revision-cambio">
+<strong>Predicción 1:</strong>
+
+<p>
     Estime el porcentaje de participantes B de esta sesión que elegirá COMPARTIR.
 </p>
 
-<p class="revision-cambio">
+<p>
     Creo que el <span id="porcentajeEnFrase">_____</span>% de los participantes B elegirá COMPARTIR.
 </p>
 
 {{ include_sibling 'BarraCreencia.html' }}
 
-<p class="revision-cambio">
+<p>
     Por cada estimación que difiera en no más de 5 puntos porcentuales del porcentaje real, recibirá $6.000.
 </p>
 
-<p class="revision-cambio">
+<p>
     Por cada estimación que difiera en más de 5 puntos porcentuales del porcentaje real, recibirá $0.
 </p>
 
-<p class="revision-cambio">
+<p>
     Si esta instancia es elegida para el pago, recibirá la suma de los pagos correspondientes a ambas predicciones.
 </p>
 
