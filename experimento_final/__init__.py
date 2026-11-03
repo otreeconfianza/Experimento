@@ -666,9 +666,12 @@ def modal_response(values):
 
 
 def score_percentage(predicted_percentage, realized_percentage):
-    if predicted_percentage is None or realized_percentage is None:
+    if not isinstance(predicted_percentage, (int, float)) or not 0 <= predicted_percentage <= 100:
         return cu(0)
-    if not (0 <= predicted_percentage <= 100 and 0 <= realized_percentage <= 100):
+    # Sin referencia, una estimación válida se paga como acertada.
+    if realized_percentage is None:
+        return C.BELIEF_PAYMENT
+    if not 0 <= realized_percentage <= 100:
         return cu(0)
     if abs(predicted_percentage - realized_percentage) <= C.BELIEF_TOLERANCE_PP:
         return C.BELIEF_PAYMENT

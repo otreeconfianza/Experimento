@@ -31,7 +31,7 @@ class Rules(unittest.TestCase):
     def test_percentage_tolerance_inclusive(self):
         for estimate, real in [(50,45),(50,55),(0,0),(0,5),(100,95),(100,100),(33,100/3)]:
             self.assertEqual(ns['score_percentage'](estimate,real),6000)
-        for estimate, real in [(50,44.999),(50,55.001),(0,5.001),(100,94.999),(-1,0),(101,100),(None,50),(50,None)]:
+        for estimate, real in [(50,44.999),(50,55.001),(0,5.001),(100,94.999),(-1,0),(101,100),(None,50)]:
             self.assertEqual(ns['score_percentage'](estimate,real),0)
     def test_zero_is_valid_and_missing_answer_is_rejected(self):
         for name,key in [('CreenciaParticipanteA','creencia_a'),('CreenciaPorcentajeAContina','creencia_a_porcentaje'),('CreenciaBPorcentajeA','creencia_b_porcentaje'),('CreenciaBEstimacionA','creencia_b_estimacion_a')]:
@@ -45,6 +45,11 @@ class Rules(unittest.TestCase):
     def test_no_observed_b(self):
         self.assertIsNone(ns['percentage_yes']([Player(None)],'x','compartir'))
         self.assertEqual(ns['score_percentage']('0_20',None),0)
+        for estimate in [0, 50, 100]:
+            self.assertEqual(ns['score_percentage'](estimate,None),6000)
+        for estimate in [None, -1, 101]:
+            self.assertEqual(ns['score_percentage'](estimate,None),0)
+        self.assertEqual(ns['score_percentage'](100,0),0)
     def test_other_a_excludes_self_with_opposite_decisions(self):
         a1=Player(id=1, decision_a_f1='continuar', a_a=0)
         a2=Player(id=2, decision_a_f1='no_continuar', a_a=100)
@@ -53,7 +58,7 @@ class Rules(unittest.TestCase):
     def test_only_one_a_has_no_other_reference(self):
         a=Player(a_a=100, decision_a_f1='continuar')
         ns['compute_belief_payoffs_trust'](session([a]))
-        self.assertEqual(a.belief_pay,0)
+        self.assertEqual(a.belief_pay,6000)
     def test_b_uses_all_a_and_two_predictions(self):
         a1=Player(id=1, decision_a_f1='continuar', a_b=70)
         a2=Player(id=2, decision_a_f1='no_continuar')
