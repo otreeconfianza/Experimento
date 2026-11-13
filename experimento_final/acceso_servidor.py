@@ -36,7 +36,6 @@ class AccesoIndividual:
                 return
         if scope['type'] == 'http' and (
             path == '/join' or path.startswith('/join/')
-            or path == '/demo' or path.startswith('/demo/')
         ):
             body = (
                 '<!doctype html><html lang="es"><meta charset="utf-8">'
@@ -51,6 +50,8 @@ class AccesoIndividual:
                                     (b'cache-control', b'no-store')]})
             await send({'type': 'http.response.body', 'body': body})
             return
+        # Demo is an administrative route. In STUDY mode oTree itself redirects
+        # anonymous visitors to Login and admits authenticated administrators.
         await self.app(scope, receive, send)
 
     async def acceso_aula(self, scope, receive, send, clave):
