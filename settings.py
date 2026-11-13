@@ -1,4 +1,5 @@
 from os import environ
+from pathlib import Path
 
 SESSION_CONFIGS = [
     dict(
@@ -19,6 +20,12 @@ ROOMS = [
     dict(
         name='actividad_final',
         display_name='Actividad final',
+        participant_label_file=environ.get(
+            'OTREE_ACCESS_CODES_FILE',
+            str(Path(__file__).resolve().parent / 'experimento_final' / 'accesos_cerrados.txt'),
+        ),
+        # The label itself is a cryptographically random 128-bit access code.
+        use_secure_urls=False,
     ),
 ]
 
