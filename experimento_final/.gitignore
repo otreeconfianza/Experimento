@@ -1,2 +1,7 @@
 accesos_privados*.txt
 output/respaldo*.sqlite3
+
+# Auditorías y artefactos locales: no publicar.
+/auditoria/
+/output/
+/tmp/
