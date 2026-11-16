@@ -1534,7 +1534,7 @@ class Resultados(Page):
             ),
             pago_final=player.payoff or cu(0),
             numero_pago=player.numero_pago,
-            microsoft_forms_url='https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=l9b-Sf8B1kKlo25lunDYntXP2DRyIjhJgSaUU6CvWAtUQklCT1NWNzc1QTAyUjBUQzVTN0o3V1JTMy4u',
+            microsoft_forms_url='https://forms.cloud.microsoft/r/A1gjRwTHC5',
         )
     
 
