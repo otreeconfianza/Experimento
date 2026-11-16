@@ -211,9 +211,8 @@ class AccesoIndividual:
     });
 }());
 </script>
+<p><strong>Use siempre este navegador para conservar su lugar. No abra otra ventana privada.</strong></p>
 <p>Usamos una cookie técnica para conservar su plaza y evitar ingresos duplicados.</p>
-<p>Use siempre este navegador para conservar su lugar. No abra otra ventana privada.</p>
-<p>Al ingresar verá su identificador individual. Anótelo para que el equipo pueda ayudarlo.</p>
 </main></html>''').encode()
         await send({'type': 'http.response.start', 'status': 200,
                     'headers': [(b'content-type', b'text/html; charset=utf-8'),
