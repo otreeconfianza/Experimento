@@ -166,13 +166,34 @@ class AccesoIndividual:
 <p>Ingrese el código que muestra el equipo en el aula.</p>
 <p role="alert">''' + error + '''</p>
 <form id="ingreso-aula" method="post"><label for="clave">Código del aula</label><br>
+<div style="display:flex;align-items:center;gap:8px;margin:12px 0">
 <input id="clave" name="clave" type="password" required maxlength="200"
- autocomplete="off" style="padding:12px;margin:12px 0;width:90%"><br>
+ autocomplete="off" style="padding:12px;flex:1;min-width:0">
+<button id="mostrar-clave" type="button" aria-label="Mostrar código del aula"
+ aria-controls="clave" aria-pressed="false" title="Mostrar código del aula"
+ style="padding:10px;min-width:44px;min-height:44px;cursor:pointer">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+ stroke-width="2" aria-hidden="true" focusable="false">
+<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg></button></div>
 <button id="boton-ingreso" style="padding:12px 24px">Ingresar</button></form>
 <script>
 (function () {
     const form = document.getElementById('ingreso-aula');
     const button = document.getElementById('boton-ingreso');
+    const clave = document.getElementById('clave');
+    const mostrarClave = document.getElementById('mostrar-clave');
+    function actualizarVisibilidad(visible) {
+        clave.type = visible ? 'text' : 'password';
+        mostrarClave.setAttribute('aria-pressed', String(visible));
+        const etiqueta = visible ? 'Ocultar código del aula' : 'Mostrar código del aula';
+        mostrarClave.setAttribute('aria-label', etiqueta);
+        mostrarClave.title = etiqueta;
+    }
+    mostrarClave.addEventListener('click', function () {
+        actualizarVisibilidad(clave.type === 'password');
+    });
     let enviando = false;
     form.addEventListener('submit', function (event) {
         if (enviando) { event.preventDefault(); return; }
@@ -182,6 +203,7 @@ class AccesoIndividual:
         form.setAttribute('aria-busy', 'true');
     });
     window.addEventListener('pageshow', function () {
+        actualizarVisibilidad(false);
         enviando = false;
         button.disabled = false;
         button.textContent = 'Ingresar';
