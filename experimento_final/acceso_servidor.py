@@ -3,7 +3,24 @@ import os
 from pathlib import Path
 import sys
 import hmac
-from urllib.parse import parse_qs
+import hashlib
+import secrets
+from http.cookies import SimpleCookie
+from urllib.parse import parse_qs, urlencode
+
+
+COOKIE_INGRESO = 'aula_ingreso'
+VIGENCIA_INGRESO = 12 * 60 * 60
+
+
+def instalar_control(app):
+    # Run INSIDE oTree's session and transaction middleware. This preserves its
+    # request lock, commit/rollback and administrative authentication unchanged.
+    if not isinstance(app.router, AccesoIndividual):
+        app.router = AccesoIndividual(app.router)
+        # Starlette 0.14 (pinned by oTree 6) builds the stack eagerly.
+        app.middleware_stack = app.build_middleware_stack()
+    return app
 
 
 class AccesoIndividual:
@@ -56,6 +73,34 @@ class AccesoIndividual:
 
     async def acceso_aula(self, scope, receive, send, clave):
         """A shared password is checked before oTree can allocate any participant."""
+        from itsdangerous import URLSafeTimedSerializer, BadData
+        from starlette.requests import Request
+        from otree.common import _SECRET
+
+        signer = URLSafeTimedSerializer(_SECRET, salt='ingreso-aula-v1')
+        raw_cookie = Request(scope).cookies.get(COOKIE_INGRESO)
+        navegador = None
+        if raw_cookie:
+            try:
+                value = signer.loads(raw_cookie, max_age=VIGENCIA_INGRESO)
+                if isinstance(value, str) and len(value) == 32:
+                    int(value, 16)
+                    navegador = value
+            except (BadData, ValueError):
+                pass
+        cookie_valida = navegador is not None
+        if navegador is None:
+            navegador = secrets.token_hex(16)
+        cookie = SimpleCookie()
+        cookie[COOKIE_INGRESO] = signer.dumps(navegador)
+        cookie[COOKIE_INGRESO]['path'] = '/room/actividad_final'
+        cookie[COOKIE_INGRESO]['max-age'] = VIGENCIA_INGRESO
+        cookie[COOKIE_INGRESO]['httponly'] = True
+        cookie[COOKIE_INGRESO]['samesite'] = 'Lax'
+        if scope.get('scheme') == 'https' or os.getenv('RENDER'):
+            cookie[COOKIE_INGRESO]['secure'] = True
+        cookie_header = (b'set-cookie', cookie.output(header='').strip().encode('latin-1'))
+
         error = ''
         if scope.get('method') == 'POST':
             body = b''
@@ -71,17 +116,43 @@ class AccesoIndividual:
                     break
             params = parse_qs(body.decode('utf-8', errors='replace'))
             submitted = params.get('clave', [''])[0]
+            if not error and not cookie_valida:
+                error = ('No se pudo confirmar la cookie de ingreso. Permita las cookies '
+                         'de este sitio y vuelva a ingresar la clave. No se ocupó ninguna plaza.')
             if not error and hmac.compare_digest(submitted.encode(), clave.encode()):
                 from otree.room import ROOM_DICT
+                from otree.database import db, engine
+                from otree.models import Participant
                 room = ROOM_DICT['actividad_final']
                 session = room.get_session()
                 if session is not None:
-                    # Use oTree's own session-specific cookie assignment. Repeated
-                    # entry in the same browser recovers the existing participant.
+                    # Stable, session-specific label: concurrent POSTs carry the
+                    # same cookie and resolve to the same participant in oTree.
+                    digest = hmac.new(_SECRET.encode(),
+                                      f'{session.code}:{navegador}'.encode(), hashlib.sha256).digest()
+                    etiqueta = 'aula' + digest.hex()[:32]
+                    if engine.dialect.name == 'postgresql':
+                        # Also serialize enrolment across processes/instances;
+                        # the lock is released by oTree's transaction middleware.
+                        db._db.execute('SELECT pg_advisory_xact_lock(:key)',
+                                       {'key': int.from_bytes(hmac.new(
+                                           _SECRET.encode(), f'aforo:{session.code}'.encode(),
+                                           hashlib.sha256).digest()[:8], 'big', signed=True)})
+                    # Preserve participants enrolled before this change, whose
+                    # existing oTree cookie already points to their assigned slot.
+                    codigo_anterior = scope['session'].get(f'session_{session.code}_participant')
+                    if codigo_anterior:
+                        anterior = Participant.objects_filter(
+                            code=codigo_anterior, session_id=session.id).first()
+                        if anterior is not None and anterior.visited:
+                            if anterior.label:
+                                etiqueta = anterior.label
+                            else:
+                                anterior.set_label(etiqueta)
                     forwarded = dict(scope, method='GET',
                                      path=f'/join/{session._anonymous_code}',
                                      raw_path=f'/join/{session._anonymous_code}'.encode(),
-                                     query_string=b'')
+                                     query_string=urlencode({'participant_label': etiqueta}).encode())
                     await self.app(forwarded, receive, send)
                     return
                 error = 'El equipo todavía no habilitó la sesión. Espere y vuelva a intentar.'
@@ -94,10 +165,31 @@ class AccesoIndividual:
 <h1>Acceso al experimento</h1>
 <p>Ingrese el código que muestra el equipo en el aula.</p>
 <p role="alert">''' + error + '''</p>
-<form method="post"><label for="clave">Código del aula</label><br>
+<form id="ingreso-aula" method="post"><label for="clave">Código del aula</label><br>
 <input id="clave" name="clave" type="password" required maxlength="200"
  autocomplete="off" style="padding:12px;margin:12px 0;width:90%"><br>
-<button style="padding:12px 24px">Ingresar</button></form>
+<button id="boton-ingreso" style="padding:12px 24px">Ingresar</button></form>
+<script>
+(function () {
+    const form = document.getElementById('ingreso-aula');
+    const button = document.getElementById('boton-ingreso');
+    let enviando = false;
+    form.addEventListener('submit', function (event) {
+        if (enviando) { event.preventDefault(); return; }
+        enviando = true;
+        button.disabled = true;
+        button.textContent = 'Ingresando…';
+        form.setAttribute('aria-busy', 'true');
+    });
+    window.addEventListener('pageshow', function () {
+        enviando = false;
+        button.disabled = false;
+        button.textContent = 'Ingresar';
+        form.removeAttribute('aria-busy');
+    });
+}());
+</script>
+<p>Usamos una cookie técnica para conservar su plaza y evitar ingresos duplicados.</p>
 <p>Use siempre este navegador para conservar su lugar. No abra otra ventana privada.</p>
 <p>Al ingresar verá su identificador individual. Anótelo para que el equipo pueda ayudarlo.</p>
 </main></html>''').encode()
@@ -105,7 +197,7 @@ class AccesoIndividual:
                     'headers': [(b'content-type', b'text/html; charset=utf-8'),
                                 (b'cache-control', b'no-store'),
                                 (b'x-frame-options', b'DENY'),
-                                (b'referrer-policy', b'no-referrer')]})
+                                (b'referrer-policy', b'no-referrer'), cookie_header]})
         await send({'type': 'http.response.body', 'body': body})
 
 
@@ -125,7 +217,7 @@ def main():
     from otree.main import setup
     setup()
     from otree import asgi
-    asgi.app = AccesoIndividual(asgi.app)
+    instalar_control(asgi.app)
     from otree.cli.base import call_command
     call_command('prodserver', *sys.argv[1:])
 
